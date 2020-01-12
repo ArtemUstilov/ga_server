@@ -44,3 +44,13 @@ def roulette(population, values, final_population_size):
     for x in range(final_population_size):
         res.append(getIndividual(population, values, random.uniform(0, val_sum)))
     return np.array(res, dtype=np.int8)
+
+def tournament(population, values, final_population_size, tournament_size):
+    res = []
+    for i in range(final_population_size):
+        randomIndexes = np.random.choice(len(population), tournament_size, replace=False)
+        selectedValues = np.take(values, randomIndexes)
+        selectedIndividuals = np.take(population, randomIndexes, axis=0)
+        maxIndex = np.argmax(selectedValues)
+        res.append(selectedIndividuals[maxIndex])
+    return res
