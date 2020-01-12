@@ -16,4 +16,4 @@ class TestSplitPopulation(TestCase):
 
     def test_all_pure(self):
         pop = split_population(10, 5, 100, 0)
-        self.assertEquals(pop.sum(), 0)
+        self.assertEqual(pop.sum(), 0)

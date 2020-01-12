@@ -11,8 +11,8 @@ class TestHammingDistance(TestCase):
         pop = np.zeros((10, 5), dtype=np.int8)
         health = hamming_distance(pop)
 
-        self.assertEquals(health.shape, (10,))
-        self.assertEquals(health.dtype, np.int32)
+        self.assertEqual(health.shape, (10,))
+        self.assertEqual(health.dtype, np.int32)
         assert_array_equal(
             health,
             np.zeros(10, dtype=np.int8)
@@ -41,8 +41,8 @@ class TestConst(TestCase):
         pop = np.zeros((10, length), dtype=np.int8)
 
         health = const(pop)
-        self.assertEquals(health.shape, (10,))
-        self.assertEquals(health.dtype, np.int32)
+        self.assertEqual(health.shape, (10,))
+        self.assertEqual(health.dtype, np.int32)
         self.assertTrue(np.any(health == length))
 
 
