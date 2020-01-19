@@ -30,17 +30,24 @@ import numpy as np
 
 
 def roulette(population, values, final_population_size):
+    sum_val = values.sum()
+    if sum_val != 0:
+        probabilities = values/sum_val
+    else:
+        probabilities = 1/len(values)
 
-    def getIndividual(p, v, val):
-        acc = v[0]
-        ind = 0
-        while (acc < val):
-            ind += 1
-            acc += v[ind]
-        return p[ind]
+    def get_indiv(ind):
+        return population[ind]
 
+    random_indexes = np.random.choice(np.arange(0, len(population), 1), final_population_size, p=probabilities)
+    return np.array(list(map(get_indiv, random_indexes)))
+
+def tournament(population, values, final_population_size, tournament_size):
     res = []
-    val_sum = np.sum(values)
-    for x in range(final_population_size):
-        res.append(getIndividual(population, values, random.uniform(0, val_sum)))
-    return np.array(res, dtype=np.int8)
+    for i in range(final_population_size):
+        randomIndexes = np.random.choice(len(population), tournament_size, replace=False)
+        selectedValues = np.take(values, randomIndexes)
+        selectedIndividuals = np.take(population, randomIndexes, axis=0)
+        maxIndex = np.argmax(selectedValues)
+        res.append(selectedIndividuals[maxIndex])
+    return res
