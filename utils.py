@@ -1,5 +1,7 @@
 import random
 import numpy as np
+from scipy import stats
+import estimation
 
 GOOD_INITIAL_PERCENT = 13.5
 GOOD_OTHERS_PERCENT = 24.5
@@ -33,3 +35,51 @@ def generate_locus_roles(size: int) -> np.ndarray:
     lethal_inds = list(set(tail).difference(good_inds).difference(bad_inds))
     roles[lethal_inds] = LETHAL
     return roles
+
+
+def mse(health):
+    return health.std()
+
+
+def average(health):
+    return health.average()
+
+
+def mean(health):
+    return health.mean()
+
+
+def mode(health):
+    return stats.mode(health)
+
+
+def mod_diff_best(health):
+    # TODO find where to get optimal value
+    opt = 0
+    return abs(opt - health.max())
+
+
+def mod_diff_average(health):
+    # TODO find where to get optimal value
+    opt = 0
+    return abs(opt - average(health))
+
+
+def get_wild_type(population):
+
+    def get_max(x):
+        return np.argmax(np.bincount(x))
+
+    return np.array(list(map(get_max, population.swapaxes(0,1))))
+
+
+def percent_polymorf_wild(population):
+    return polymorf_wild(population)/population.shape[1]
+
+
+def polymorf_wild(population):
+    return estimation.hamming_distance(np.array([get_wild_type(population)]))[0]
+
+
+def hamming_distances(population):
+    return np.bincount(estimation.hamming_distance(population))
