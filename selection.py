@@ -42,6 +42,7 @@ def roulette(population, values, final_population_size):
     random_indexes = np.random.choice(np.arange(0, len(population), 1), final_population_size, p=probabilities)
     return np.array(list(map(get_indiv, random_indexes)))
 
+
 def tournament(population, values, final_population_size, tournament_size):
     res = []
     for i in range(final_population_size):
