@@ -41,7 +41,3 @@ def create_empty_frame(num_locuses, num_max_iter):
     cols = get_props(num_locuses)
     z = np.zeros((num_max_iter, len(cols)), dtype=np.int8)
     return pd.DataFrame(z, columns=cols)
-
-
-fr = create_empty_frame(10, 20)
-write_file('test_1', fr)

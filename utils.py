@@ -83,3 +83,23 @@ def polymorf_wild(population):
 
 def hamming_distances(population):
     return np.bincount(estimation.hamming_distance(population))
+
+
+def pairwise_hamming_distribution(population):
+    matrix = (population[:, None, :] != population).sum(2)
+    np.fill_diagonal(matrix, -1)
+    d = np.zeros(population.shape[1], dtype=np.int64)
+    for i in range(len(d)):
+        d[i] = (matrix == i).sum() / 2
+
+    return d
+
+
+def ideal_hamming_distribution(population):
+    matrix = population.sum(1)
+    d = np.zeros(population.shape[1], dtype=np.int64)
+
+    for i in range(population.shape[1]):
+        d[i] = (matrix == i).sum()
+
+    return d
