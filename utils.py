@@ -103,3 +103,21 @@ def ideal_hamming_distribution(population):
         d[i] = (matrix == i).sum()
 
     return d
+
+
+def wild_type_hamming_distribution(population):
+    num_ind = population.shape[0]
+    num_locuses = population.shape[1]
+
+    matrix = population.sum(1)
+    wild_type = (matrix > (num_ind / 2)).astype(np.int8)
+
+    distandes = np.bitwise_xor(population, wild_type).sum(1)
+
+    d = np.zeros(num_locuses, dtype=np.int64)
+
+    for i in range(num_locuses):
+        d[i] = (distandes == i).sum()
+
+    return d
+

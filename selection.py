@@ -39,8 +39,9 @@ def roulette(population, values, final_population_size):
     def get_indiv(ind):
         return population[ind]
 
-    random_indexes = np.random.choice(np.arange(0, len(population), 1), final_population_size, p=probabilities)
+    random_indexes = np.random.choice(np.arange(len(population)), final_population_size, p=probabilities)
     return np.array(list(map(get_indiv, random_indexes)))
+    # return population[random_indexes]
 
 
 def tournament(population, values, final_population_size, tournament_size):

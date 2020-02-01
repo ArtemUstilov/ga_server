@@ -31,10 +31,9 @@ def write_file(name, dataframe):
     path = os.path.join(os.curdir, 'out')
     if not os.path.exists(path):
         os.mkdir(path)
-    path = os.path.join(path, f'{name}.xlsx')
-    writer = pd.ExcelWriter(path, engine='xlsxwriter')
-    dataframe.to_excel(writer, index=False)
-    writer.save()
+    path = os.path.join(path, f'{name}.csv')
+    dataframe.to_csv(path, index=False)
+
 
 
 def create_empty_frame(num_locuses, num_max_iter):
