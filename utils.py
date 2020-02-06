@@ -109,7 +109,7 @@ def wild_type_hamming_distribution(population):
     num_ind = population.shape[0]
     num_locuses = population.shape[1]
 
-    matrix = population.sum(1)
+    matrix = population.sum(0)
     wild_type = (matrix > (num_ind / 2)).astype(np.int8)
 
     distandes = np.bitwise_xor(population, wild_type).sum(1)

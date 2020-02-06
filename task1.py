@@ -3,12 +3,17 @@ import pandas as pd
 
 import numpy as np
 
+from database import engine
 from files import write_file
 from initialization import uniform
 from estimation import hamming_distance
 from mutation import mutate
 from selection import roulette
-from utils import pairwise_hamming_distribution
+from utils import (
+    pairwise_hamming_distribution,
+    ideal_hamming_distribution,
+    wild_type_hamming_distribution,
+)
 
 EPS = 0.1
 N_IT = 20000
@@ -38,8 +43,14 @@ def run(run_id, l, n, px):
         if i % 100 == 0:
             print('Iteration:', i)
 
-    df = pd.DataFrame(hist_file[:stop+1], columns=get_cols(l))
-    write_file(f'task1\\task1_id_{run_id}_L_{l}_N_{n}_px_{px:.4f}', df)
+    df = pd.DataFrame(hist_file[:stop+2], columns=get_cols(l))
+    name = f'task1\\task1_id_{run_id}_L_{l}_N_{n}_px_{px:.4f}'
+
+    print('saving')
+    df.to_sql(name, engine)
+    print('to_db')
+    write_file(name, df)
+    print('to_file')
 
 
 def get_empty_histogram(its, l):
@@ -50,8 +61,11 @@ def append_to_histogram(hist, pop, mean_health, best_health, it):
     num_ind = pop.shape[0]
     hist[it, 0] = it  # N of iteration
     hist[it, 1] = num_ind  # N of inds
+
     ham_dist = pairwise_hamming_distribution(pop)
-    # TODO hamming distance distribution
+    ideal_dist = ideal_hamming_distribution(pop)
+    wild_dist = wild_type_hamming_distribution(pop)
+
     s = ham_dist.sum()
     e = 0
     e2 = 0
