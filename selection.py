@@ -36,20 +36,18 @@ def roulette(population, values, final_population_size):
     else:
         probabilities = 1/len(values)
 
-    def get_indiv(ind):
-        return population[ind]
-
-    random_indexes = np.random.choice(np.arange(len(population)), final_population_size, p=probabilities)
-    return np.array(list(map(get_indiv, random_indexes)))
-    # return population[random_indexes]
+    random_indexes = np.random.choice(len(population), final_population_size, p=probabilities)
+    # return np.array(list(map(get_indiv, random_indexes)))
+    return population[random_indexes]
 
 
 def tournament(population, values, final_population_size, tournament_size):
-    res = []
-    for i in range(final_population_size):
-        randomIndexes = np.random.choice(len(population), tournament_size, replace=False)
-        selectedValues = np.take(values, randomIndexes)
-        selectedIndividuals = np.take(population, randomIndexes, axis=0)
-        maxIndex = np.argmax(selectedValues)
-        res.append(selectedIndividuals[maxIndex])
-    return res
+
+    def take_best_index(*args):
+        random_indexes = np.random.choice(len(population), tournament_size, replace=False)
+        max_index = max(random_indexes, key=lambda i: values[i])
+        return max_index
+
+    inds = np.vectorize(take_best_index)(np.zeros(final_population_size))
+
+    return population[inds]
