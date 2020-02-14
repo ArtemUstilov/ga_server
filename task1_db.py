@@ -1,5 +1,6 @@
 from psycopg2.extras import execute_values
 
+import selection
 from database import open_db_cursor
 from estimation import hamming_distance
 from initialization import uniform
@@ -17,7 +18,7 @@ def run_aggr(l, n, px, selection_func):
 
     # Start loop
     last_mean_health = health.mean()
-    successful = False
+    final_iter_num = N_IT - 1
     last_counter = 0
 
     for i in range(1, N_IT):
@@ -31,11 +32,11 @@ def run_aggr(l, n, px, selection_func):
         else:
             last_counter = 0
         if last_counter >= 10:
-            successful = True
+            final_iter_num = i
             break
         last_mean_health = mean_health
 
-    return successful
+    return final_iter_num
 
 
 def store_in_db_aggr(cursor, conn, sql_script, l, n, sel_type,
@@ -92,15 +93,15 @@ def rws(pop, health, n_ind):
 
 
 def tournament_2(pop, health, n_ind):
-    return tournament(pop, health, n_ind, 2)
+    return selection.tournament_2(pop, health, n_ind)
 
 
 def tournament_4(pop, health, n_ind):
-    return tournament(pop, health, n_ind, 4)
+    return selection.tournament_4(pop, health, n_ind)
 
 
 def tournament_12(pop, health, n_ind):
-    return tournament(pop, health, n_ind, 12)
+    return selection.tournament_12(pop, health, n_ind)
 
 
 SELECTION_MAP = {
@@ -118,7 +119,7 @@ def find_px(table_name):
     """
 
     with open_db_cursor() as (cursor, conn):
-        for selection_func in [rws, tournament_2, tournament_4, tournament_12]:
+        for selection_func in [tournament_4]:
             print('Selection:', selection_func.__name__)
             for l in [10, 20, 80, 100, 200]:
                 print('L:', l)
@@ -130,11 +131,11 @@ def find_px(table_name):
                         print('\t\ti:', i)
                         count_successful = 0
                         run_results = []
-                        for j in range(10):
+                        for j in range(50):
                             print('\t\t\tj:', j)
-                            successful = run_aggr(l, n, px, selection_func)
-                            run_results.append(successful)
-                            if successful:
+                            fin_iter_num = run_aggr(l, n, px, selection_func)
+                            run_results.append(fin_iter_num)
+                            if fin_iter_num + 1 < N_IT:
                                 count_successful += 1
                             else:
                                 break
@@ -153,7 +154,7 @@ def find_px(table_name):
                             is_final=i == 14
                         )
 
-                        if count_successful == 10:
+                        if count_successful == 50:
                             px += sigma
                         else:
                             px -= sigma
@@ -161,46 +162,12 @@ def find_px(table_name):
                         sigma = sigma * 0.5
 
 
-def find_px_v2(table_name):
-    sql_aggr = f"""
-    INSERT INTO {table_name} ({','.join(cols_aggr)})
-    VALUES %s;
-    """
-
-    with open_db_cursor() as (cursor, conn):
-        for l in [20]:
-            print('L:', l)
-            for n in [100]:
-                print('\tn:', n)
-                left = 0
-                right = 0.1
-                for try_id in range(40):
-                    print('\t\ttry_id:', try_id)
-                    px = (left + right) * 0.5
-                    count_succ = 0
-                    run_results = []
-                    for run_id in range(10):
-                        print('\t\t\tRun_id:', run_id)
-                        succ = run_aggr(l, n, px)
-                        run_results.append(succ)
-                        if succ:
-                            count_succ += 1
-                        else:
-                            break
-
-                    store_in_db_aggr(cursor, conn, sql_aggr, l, n,
-                                     'rws', try_id, px, run_results, count_succ, try_id == 14)
-                    if count_succ == 10:
-                        left = px
-                    else:
-                        right = px
-
-
-def test_px(table_from_name, table_to_name):
+def test_px(table_from_name, table_to_name, rows=None):
     sql_select = f"""
         SELECT id, type, l, n, cur_px 
         FROM {table_from_name}
-        WHERE is_final=true
+        WHERE chosen_for_test=true AND id NOT IN (SELECT record_id FROM {table_to_name} 
+                                                    WHERE  record_id IS NOT NULL)
         ORDER BY type;
     """
 
@@ -210,27 +177,28 @@ def test_px(table_from_name, table_to_name):
     """
 
     with open_db_cursor() as (cursor, conn):
-        cursor.execute(sql_select)
-        rows = cursor.fetchall()
+        if not rows:
+            cursor.execute(sql_select)
+            rows = cursor.fetchall()
         for (rec_id, sel_type, l, n, cur_px) in rows:
-            print((sel_type, l, n, cur_px))
+            print((rec_id, sel_type, l, n, cur_px))
             # Testing px
             count_successful = 0
             run_results = []
-            for j in range(10):
+            for j in range(50):
                 successful = run_aggr(l, n, cur_px, SELECTION_MAP[sel_type])
                 run_results.append(successful)
-                if successful:
+                if successful + 1 < N_IT:
                     count_successful += 1
             print('1:', run_results)
             # Testing 1.2*px
             px120 = 1.2 * cur_px
             count_successful120 = 0
             run_results120 = []
-            for j in range(10):
+            for j in range(50):
                 successful = run_aggr(l, n, px120, SELECTION_MAP[sel_type])
                 run_results120.append(successful)
-                if successful:
+                if successful + 1 < N_IT:
                     count_successful120 += 1
             print('2:', run_results120)
 
@@ -238,10 +206,10 @@ def test_px(table_from_name, table_to_name):
             px80 = 0.8 * cur_px
             count_successful80 = 0
             run_results80 = []
-            for j in range(10):
+            for j in range(50):
                 successful = run_aggr(l, n, px80, SELECTION_MAP[sel_type])
                 run_results80.append(successful)
-                if successful:
+                if successful + 1 < N_IT:
                     count_successful80 += 1
             print('3:', run_results80)
 
@@ -264,3 +232,18 @@ def test_px(table_from_name, table_to_name):
 
             execute_values(cursor, sql_insert_test, [data])
             conn.commit()
+
+
+def graph_px(sel_type, l, n, px):
+    print((sel_type, l, n, px))
+    # Testing px
+
+    for step in range(11):
+        cur_px = px + (step * 0.01) * px
+        count_successful = 0
+        for j in range(50):
+            # print('j:', j)
+            successful = run_aggr(l, n, cur_px, SELECTION_MAP[sel_type])
+            if successful + 1 < N_IT:
+                count_successful += 1
+        print(step, ' step:', count_successful, '; px =', cur_px)

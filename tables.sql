@@ -13,6 +13,21 @@ CREATE TABLE task1_aggr_v4 (
 );
 
 
+CREATE TABLE task1_aggr_v5 (
+    id SERIAL PRIMARY KEY ,
+    L INTEGER,
+    N INTEGER,
+    type varchar(15),
+    try_id INTEGER,
+    cur_px DOUBLE PRECISION,
+    runs_succ INTEGER[],
+    count_succ INTEGER,
+    is_final BOOLEAN,
+    chosen_for_test BOOLEAN,
+    is_result BOOLEAN
+);
+
+
 CREATE TABLE task1_aggr_test_v4 (
     id SERIAL PRIMARY KEY,
     record_id INTEGER REFERENCES task1_aggr_v4(id),
