@@ -112,54 +112,53 @@ SELECTION_MAP = {
 }
 
 
-def find_px(table_name):
+def find_px(table_name, ls, ns, progons, sels, cursor, conn):
     sql_insert = f"""
     INSERT INTO {table_name} ({','.join(cols_aggr)})
     VALUES %s;
     """
 
-    with open_db_cursor() as (cursor, conn):
-        for selection_func in [tournament_4]:
-            print('Selection:', selection_func.__name__)
-            for l in [10, 20, 80, 100, 200]:
-                print('L:', l)
-                for n in [100, 200]:
-                    print('\tn:', n)
-                    px = 1 / (50 * l)
-                    sigma = px * 0.5
-                    for i in range(15):
-                        print('\t\ti:', i)
-                        count_successful = 0
-                        run_results = []
-                        for j in range(50):
-                            print('\t\t\tj:', j)
-                            fin_iter_num = run_aggr(l, n, px, selection_func)
-                            run_results.append(fin_iter_num)
-                            if fin_iter_num + 1 < N_IT:
-                                count_successful += 1
-                            else:
-                                break
-
-                        store_in_db_aggr(
-                            cursor=cursor,
-                            conn=conn,
-                            sql_script=sql_insert,
-                            l=l,
-                            n=n,
-                            sel_type=selection_func.__name__,
-                            try_id=i,
-                            cur_px=px,
-                            runs_results=run_results,
-                            count_succ=count_successful,
-                            is_final=i == 14
-                        )
-
-                        if count_successful == 50:
-                            px += sigma
+    for selection_func in sels:
+        print('Selection:', selection_func.__name__)
+        for l in ls:
+            print('L:', l)
+            for n in ns:
+                print('\tn:', n)
+                px = 1 / (50 * l)
+                sigma = px * 0.5
+                for i in range(15):
+                    print('\t\ti:', i)
+                    count_successful = 0
+                    run_results = []
+                    for j in range(progons):
+                        print(selection_func.__name__, l, n, i,  j)
+                        fin_iter_num = run_aggr(l, n, px, selection_func)
+                        run_results.append(fin_iter_num)
+                        if fin_iter_num + 1 < N_IT:
+                            count_successful += 1
                         else:
-                            px -= sigma
+                            break
 
-                        sigma = sigma * 0.5
+                    store_in_db_aggr(
+                        cursor=cursor,
+                        conn=conn,
+                        sql_script=sql_insert,
+                        l=l,
+                        n=n,
+                        sel_type=selection_func.__name__,
+                        try_id=i,
+                        cur_px=px,
+                        runs_results=run_results,
+                        count_succ=count_successful,
+                        is_final=i == 14
+                    )
+
+                    if count_successful == progons:
+                        px += sigma
+                    else:
+                        px -= sigma
+
+                    sigma = sigma * 0.5
 
 
 def test_px(table_from_name, table_to_name, rows=None):
