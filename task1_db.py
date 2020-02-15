@@ -161,7 +161,7 @@ def find_px(table_name, ls, ns, progons, sels, cursor, conn):
                     sigma = sigma * 0.5
 
 
-def test_px(table_from_name, table_to_name, rows=None):
+def test_px(table_from_name, table_to_name, progons, cursor, conn, rows=None):
     sql_select = f"""
         SELECT id, type, l, n, cur_px 
         FROM {table_from_name}
@@ -175,62 +175,61 @@ def test_px(table_from_name, table_to_name, rows=None):
     VALUES %s;
     """
 
-    with open_db_cursor() as (cursor, conn):
-        if not rows:
-            cursor.execute(sql_select)
-            rows = cursor.fetchall()
-        for (rec_id, sel_type, l, n, cur_px) in rows:
-            print((rec_id, sel_type, l, n, cur_px))
-            # Testing px
-            count_successful = 0
-            run_results = []
-            for j in range(50):
-                successful = run_aggr(l, n, cur_px, SELECTION_MAP[sel_type])
-                run_results.append(successful)
-                if successful + 1 < N_IT:
-                    count_successful += 1
-            print('1:', run_results)
-            # Testing 1.2*px
-            px120 = 1.2 * cur_px
-            count_successful120 = 0
-            run_results120 = []
-            for j in range(50):
-                successful = run_aggr(l, n, px120, SELECTION_MAP[sel_type])
-                run_results120.append(successful)
-                if successful + 1 < N_IT:
-                    count_successful120 += 1
-            print('2:', run_results120)
+    if not rows:
+        cursor.execute(sql_select)
+        rows = cursor.fetchall()
+    for (rec_id, sel_type, l, n, cur_px) in rows:
+        print((rec_id, sel_type, l, n, cur_px))
+        # Testing px
+        count_successful = 0
+        run_results = []
+        for j in range(progons):
+            successful = run_aggr(l, n, cur_px, SELECTION_MAP[sel_type])
+            run_results.append(successful)
+            if successful + 1 < N_IT:
+                count_successful += 1
+        print('1:', run_results)
+        # Testing 1.2*px
+        px120 = 1.2 * cur_px
+        count_successful120 = 0
+        run_results120 = []
+        for j in range(progons):
+            successful = run_aggr(l, n, px120, SELECTION_MAP[sel_type])
+            run_results120.append(successful)
+            if successful + 1 < N_IT:
+                count_successful120 += 1
+        print('2:', run_results120)
 
-            # Testing 0.8*px
-            px80 = 0.8 * cur_px
-            count_successful80 = 0
-            run_results80 = []
-            for j in range(50):
-                successful = run_aggr(l, n, px80, SELECTION_MAP[sel_type])
-                run_results80.append(successful)
-                if successful + 1 < N_IT:
-                    count_successful80 += 1
-            print('3:', run_results80)
+        # Testing 0.8*px
+        px80 = 0.8 * cur_px
+        count_successful80 = 0
+        run_results80 = []
+        for j in range(progons):
+            successful = run_aggr(l, n, px80, SELECTION_MAP[sel_type])
+            run_results80.append(successful)
+            if successful + 1 < N_IT:
+                count_successful80 += 1
+        print('3:', run_results80)
 
-            data = (
-                rec_id,
-                l,
-                n,
-                sel_type,
-                cur_px,
-                run_results,
-                count_successful,
-                px120,
-                run_results120,
-                count_successful120,
-                px80,
-                run_results80,
-                count_successful80,
+        data = (
+            rec_id,
+            l,
+            n,
+            sel_type,
+            cur_px,
+            run_results,
+            count_successful,
+            px120,
+            run_results120,
+            count_successful120,
+            px80,
+            run_results80,
+            count_successful80,
 
-            )
+        )
 
-            execute_values(cursor, sql_insert_test, [data])
-            conn.commit()
+        execute_values(cursor, sql_insert_test, [data])
+        conn.commit()
 
 
 def graph_px(sel_type, l, n, px):
