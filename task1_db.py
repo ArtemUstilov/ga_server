@@ -161,12 +161,13 @@ def find_px(table_name, ls, ns, progons, sels, cursor, conn):
                     sigma = sigma * 0.5
 
 
-def test_px(table_from_name, table_to_name, progons, cursor, conn, rows=None):
+def test_px(table_from_name, table_to_name, progons, cursor, conn, rows=None, add_select=''):
     sql_select = f"""
         SELECT id, type, l, n, cur_px 
         FROM {table_from_name}
         WHERE chosen_for_test=true AND id NOT IN (SELECT record_id FROM {table_to_name} 
                                                     WHERE  record_id IS NOT NULL)
+            {add_select}
         ORDER BY type;
     """
 
