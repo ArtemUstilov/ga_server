@@ -3,51 +3,57 @@ import math
 import numpy as np
 from psycopg2.extras import execute_values
 
-from estimation import hamming_distance
-from initialization import uniform
+from database import open_db_cursor
+from estimation import const as all_l
+from initialization import all_zeros as all_0
 from mutation import mutate
-from selection import roulette
+from selection import roulette as rws, tournament_2, tournament_4, tournament_12
 from utils import pairwise_hamming_distribution, ideal_hamming_distribution, \
     wild_type_hamming_distribution
 
 EPS = 0.0001
 N_IT = 20000
 
+INIT_MAP = {
+    'all_0': all_0,
+}
 
-def run(cursor, conn, run_id, l, n, px, sql_script):
-    last_counter = 0
+ESTIM_MAP = {
+    'all_l': all_l
+}
 
-    pop = uniform(n, l)
-    health = l - hamming_distance(pop)
+SELECTION_MAP = {
+    'rws': rws,
+    'tournament_2': tournament_2,
+    'tournament_4': tournament_4,
+    'tournament_12': tournament_12,
+}
 
-    store_in_db(cursor, conn, sql_script, run_id, pop, health, health.mean(), 0)
-    last_mean_health = health.mean()
+
+def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type):
+    estimation = ESTIM_MAP[estim]
+    initialization = INIT_MAP[init]
+    selection = SELECTION_MAP[sel_type]
+
+    pop = initialization(n, l)
+    health = estimation(pop)
+
+    store_in_db(cursor, conn, sql_script, run_id, pop, health, health.mean(), 0, init, estim,
+                sel_type)
     succ = False
     for i in range(1, N_IT):
-        pop = roulette(pop, health, n)
+        pop = selection(pop, health, n)
         pop = mutate(pop, px)
-        health = l - hamming_distance(pop)
+        health = estimation(pop)
         mean_health = health.mean()
-        store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, i)
-
-        if abs(last_mean_health - mean_health) < EPS:
-            last_counter += 1
-        else:
-            last_counter = 0
-
-        if last_counter >= 10:
-            succ = True
-            break
-
-        last_mean_health = mean_health
-
-        if i % 500 == 0:
-            print('Iteration:', i)
+        store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, i,
+                    init, estim, sel_type)
 
     return succ
 
 
-def store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, it):
+def store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, it,
+                init, estim, sel_type):
     ham_dist = pairwise_hamming_distribution(pop)
     ham_dist_p = (ham_dist / ham_dist.sum())
     ideal_dist = ideal_hamming_distribution(pop)
@@ -68,6 +74,9 @@ def store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, it):
     wild_std = math.sqrt(wild_e_val_sqr - wild_e_val ** 2)
 
     data = (
+        init,
+        estim,
+        sel_type,
         pop.shape[1],  # L
         pop.shape[0],  # N
         run_id,
@@ -87,9 +96,21 @@ def store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, it):
         wild_e_val,
         wild_std,
 
-        ham_dist.argmax(),  # mode hamming pairwise
-        ideal_dist.argmax(),  # mode ideal
-        wild_dist.argmax(),  # mode wild type
+        ham_dist.min(),
+        ham_dist.max(),
+        ideal_dist.min(),
+        ideal_dist.max(),
+        wild_dist.min(),
+        wild_dist.max(),
+
+        ham_std / ham_e_val if ham_e_val != 0 else None,        # variance coef ham
+        ideal_std / ideal_e_val if ideal_e_val != 0 else None,  # variance coef ideal
+        wild_std / wild_e_val if wild_e_val != 0 else None,     # variance coef wild
+
+
+        list(np.argwhere(ham_dist == ham_dist.max()).reshape(-1)),      # mode hamming pairwise
+        list(np.argwhere(ideal_dist == ideal_dist.max()).reshape(-1)),  # mode ideal
+        list(np.argwhere(wild_dist == wild_dist.max()).reshape(-1)),    # mode wild type
 
         list(health),
         mean_health,
@@ -102,6 +123,9 @@ def store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, it):
 
 
 cols = [
+    'init',
+    'estim',
+    'sel_type',
     'L',
     'N',
     'run_id',
@@ -121,6 +145,17 @@ cols = [
     'expected_value_wild',
     'std_wild',
 
+    'min_pair',
+    'max_pair',
+    'min_ideal',
+    'max_ideal',
+    'min_wild',
+    'max_wild',
+
+    'variance_coef_pair',
+    'variance_coef_ideal',
+    'variance_coef_wild',
+
     'mode_pair',
     'mode_ideal',
     'mode_wild',
@@ -130,3 +165,33 @@ cols = [
     'mean_health_diff_0',
     'best_health_diff_0',
 ]
+
+
+def start(conn_str, table_name, inits, estims, ls, ns, sel_types, pxs, run_id_n=5):
+
+    sql_insert = f"""
+    INSERT INTO {table_name} ({','.join(cols)})
+    VALUES %s;
+    """
+
+    with open_db_cursor(conn_str) as (cursor, conn):
+        for init in inits:
+            for estim in estims:
+                for sel_type in sel_types:
+                    for l in ls:
+                        for n in ns:
+                            print((init, estim, l, n, sel_type))
+                            px = pxs[(l, n, sel_type)]
+                            for i in range(run_id_n):
+                                run(
+                                    cursor,
+                                    conn,
+                                    i,
+                                    l,
+                                    n,
+                                    px,
+                                    sql_insert,
+                                    estim,
+                                    init,
+                                    sel_type
+                                )

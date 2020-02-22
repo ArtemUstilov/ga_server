@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 
 import psycopg2
-from sqlalchemy import create_engine
 
 import numpy
 from psycopg2.extensions import register_adapter, AsIs
@@ -23,14 +22,10 @@ register_adapter(numpy.float64, addapt_numpy_float64)
 register_adapter(numpy.int64, addapt_numpy_int64)
 register_adapter(numpy.int32, addapt_numpy_int32)
 
-CONN_STR = 'postgresql://thesis:thesis@localhost:5432/thesis'
-
-engine = create_engine(CONN_STR)
-
 
 @contextmanager
-def open_db_cursor():
-    conn = psycopg2.connect(CONN_STR)
+def open_db_cursor(conn_str):
+    conn = psycopg2.connect(conn_str)
     cursor = conn.cursor()
     yield cursor, conn
     conn.commit()

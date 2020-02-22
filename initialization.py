@@ -1,6 +1,10 @@
 import numpy as np
 
 
+def all_zeros(num_ind, num_locuses):
+    return np.zeros((num_ind, num_locuses), dtype=np.int8)
+
+
 def uniform(num_ind, num_locuses):
     return np.random.randint(0, 2, (num_ind, num_locuses), dtype=np.int8)
 

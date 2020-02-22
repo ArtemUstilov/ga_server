@@ -45,40 +45,13 @@ CREATE TABLE task1_aggr_test_v4 (
     count_succ80 INTEGER
 );
 
-CREATE TABLE task1_02_02_20
-(
-    L INTEGER,
-    N INTEGER,
-    run_id INTEGER,
-    iteration INTEGER,
-
-    pairwise_hamming_distribution_p DOUBLE PRECISION[],
-    pairwise_hamming_distribution_abs BIGINT[],
-    ideal_hamming_distribution_p DOUBLE PRECISION[],
-    ideal_hamming_distribution_abs BIGINT[],
-    wild_type_hamming_distribution_p DOUBLE PRECISION[],
-    wild_type_hamming_distribution_abs BIGINT[],
-
-    expected_value_pair DOUBLE PRECISION,
-    std_pair DOUBLE PRECISION,
-    expected_value_ideal DOUBLE PRECISION,
-    std_ideal DOUBLE PRECISION,
-    expected_value_wild DOUBLE PRECISION,
-    std_wild DOUBLE PRECISION,
-
-    mode_pair INTEGER,
-    mode_ideal INTEGER,
-    mode_wild INTEGER,
-
-    health BIGINT[],
-    mean_health DOUBLE PRECISION,
-    mean_health_diff_0 DOUBLE PRECISION,
-    best_health_diff_0 DOUBLE PRECISION
-);
 
 CREATE TABLE task2_full
 (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
+    init CHAR(20),
+    estim CHAR(20),
+    sel_type CHAR(20),
     L INTEGER,
     N INTEGER,
     run_id INTEGER,
@@ -98,9 +71,21 @@ CREATE TABLE task2_full
     expected_value_wild DOUBLE PRECISION,
     std_wild DOUBLE PRECISION,
 
-    mode_pair INTEGER,
-    mode_ideal INTEGER,
-    mode_wild INTEGER,
+    min_pair BIGINT,
+    max_pair BIGINT,
+    min_ideal BIGINT,
+    max_ideal BIGINT,
+    min_wild BIGINT,
+    max_wild BIGINT,
+
+    variance_coef_pair DOUBLE PRECISION,
+    variance_coef_ideal DOUBLE PRECISION,
+    variance_coef_wild DOUBLE PRECISION,
+
+
+    mode_pair INTEGER[],
+    mode_ideal INTEGER[],
+    mode_wild INTEGER[],
 
     health BIGINT[],
     mean_health DOUBLE PRECISION,
