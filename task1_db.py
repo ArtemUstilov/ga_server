@@ -36,7 +36,7 @@ def run_aggr(l, n, px, selection_func):
             break
         last_mean_health = mean_health
 
-    return final_iter_num
+    return final_iter_num, last_mean_health
 
 
 def store_in_db_aggr(cursor, conn, sql_script, l, n, sel_type,
@@ -130,10 +130,12 @@ def find_px(table_name, ls, ns, progons, sels, cursor, conn):
                     print('\t\ti:', i)
                     count_successful = 0
                     run_results = []
+                    run_mean_h = []
                     for j in range(progons):
                         print(selection_func.__name__, l, n, i,  j)
-                        fin_iter_num = run_aggr(l, n, px, selection_func)
+                        fin_iter_num, last_mean_health = run_aggr(l, n, px, selection_func)
                         run_results.append(fin_iter_num)
+                        run_mean_h.append(last_mean_health)
                         if fin_iter_num + 1 < N_IT:
                             count_successful += 1
                         else:
@@ -185,7 +187,7 @@ def test_px(table_from_name, table_to_name, progons, cursor, conn, rows=None, ad
         count_successful = 0
         run_results = []
         for j in range(progons):
-            successful = run_aggr(l, n, cur_px, SELECTION_MAP[sel_type])
+            successful, last_mean_health = run_aggr(l, n, cur_px, SELECTION_MAP[sel_type])
             run_results.append(successful)
             if successful + 1 < N_IT:
                 count_successful += 1
@@ -195,7 +197,7 @@ def test_px(table_from_name, table_to_name, progons, cursor, conn, rows=None, ad
         count_successful120 = 0
         run_results120 = []
         for j in range(progons):
-            successful = run_aggr(l, n, px120, SELECTION_MAP[sel_type])
+            successful, last_mean_health = run_aggr(l, n, px120, SELECTION_MAP[sel_type])
             run_results120.append(successful)
             if successful + 1 < N_IT:
                 count_successful120 += 1
@@ -206,7 +208,7 @@ def test_px(table_from_name, table_to_name, progons, cursor, conn, rows=None, ad
         count_successful80 = 0
         run_results80 = []
         for j in range(progons):
-            successful = run_aggr(l, n, px80, SELECTION_MAP[sel_type])
+            successful, last_mean_health = run_aggr(l, n, px80, SELECTION_MAP[sel_type])
             run_results80.append(successful)
             if successful + 1 < N_IT:
                 count_successful80 += 1
@@ -242,7 +244,7 @@ def graph_px(sel_type, l, n, px):
         count_successful = 0
         for j in range(50):
             # print('j:', j)
-            successful = run_aggr(l, n, cur_px, SELECTION_MAP[sel_type])
+            successful, last_mean_health = run_aggr(l, n, cur_px, SELECTION_MAP[sel_type])
             if successful + 1 < N_IT:
                 count_successful += 1
         print(step, ' step:', count_successful, '; px =', cur_px)

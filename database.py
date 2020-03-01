@@ -18,9 +18,19 @@ def addapt_numpy_int32(numpy_int32):
     return AsIs(numpy_int32)
 
 
+def addapt_numpy_int8(numpy_int8):
+    return AsIs(numpy_int8)
+
+
+def addapt_numpy_bool(bool_):
+    return AsIs(bool_)
+
+
 register_adapter(numpy.float64, addapt_numpy_float64)
 register_adapter(numpy.int64, addapt_numpy_int64)
 register_adapter(numpy.int32, addapt_numpy_int32)
+register_adapter(numpy.int8, addapt_numpy_int8)
+register_adapter(numpy.bool_, addapt_numpy_bool)
 
 
 @contextmanager
