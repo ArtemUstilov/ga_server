@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def all_zeros(num_ind, num_locuses):
+def all_zeros(num_ind, num_locuses, *args, **kwargs):
     return np.zeros((num_ind, num_locuses), dtype=np.int8)
 
 
@@ -23,5 +23,18 @@ def split_population(num_ind, num_locuses, pure_p, impure_p):
     return res
 
 
-def split_population_spec(self):
-    pass
+def init_good_by_normal_distribution(num_ind, num_locuses, good,  *args, **kwargs):
+    pop = np.zeros((num_ind, num_locuses), dtype=np.int8)
+    healthes = np.round(np.abs(np.random.normal(0, 1, num_ind)))
+
+    for i in range(num_ind):
+        count = 0
+        while count < healthes[i]:
+            ind = np.random.randint(0, num_locuses)
+            while good[ind] != 0:
+                ind = np.random.randint(0, num_locuses)
+
+            pop[i][ind] = 1
+            count += 1
+
+    return pop
