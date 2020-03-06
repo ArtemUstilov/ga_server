@@ -3,7 +3,7 @@ import math
 import numpy as np
 from psycopg2.extras import execute_values
 
-from count_next_population_sizes import next_population_size_type_1
+from count_next_population_sizes import next_population_size_type_1, next_population_size_type_2
 from database import open_db_cursor
 from estimation import const as all_l
 from initialization import all_zeros as all_0
@@ -32,14 +32,21 @@ SELECTION_MAP = {
 
 SIZE_POP = {
     'type_1': next_population_size_type_1,
+    'type_2': next_population_size_type_2,
 }
+
+N_POP = {
+    'type_1': 1000,
+    'type_2': 2000,
+}
+
 
 def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type, size_pop_type):
     estimation = ESTIM_MAP[estim]
     initialization = INIT_MAP[init]
     selection = SELECTION_MAP[sel_type]
     size_pop = SIZE_POP[size_pop_type]
-    pop = initialization(n, l)
+    pop = initialization(size_pop(0), l)
     health = estimation(pop)
 
     store_in_db(cursor, conn, sql_script, run_id, pop, health, health.mean(), 0, init, estim,
@@ -111,14 +118,13 @@ def store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, it,
         wild_dist.min(),
         wild_dist.max(),
 
-        ham_std / ham_e_val if ham_e_val != 0 else None,        # variance coef ham
+        ham_std / ham_e_val if ham_e_val != 0 else None,  # variance coef ham
         ideal_std / ideal_e_val if ideal_e_val != 0 else None,  # variance coef ideal
-        wild_std / wild_e_val if wild_e_val != 0 else None,     # variance coef wild
+        wild_std / wild_e_val if wild_e_val != 0 else None,  # variance coef wild
 
-
-        list(np.argwhere(ham_dist == ham_dist.max()).reshape(-1)),      # mode hamming pairwise
+        list(np.argwhere(ham_dist == ham_dist.max()).reshape(-1)),  # mode hamming pairwise
         list(np.argwhere(ideal_dist == ideal_dist.max()).reshape(-1)),  # mode ideal
-        list(np.argwhere(wild_dist == wild_dist.max()).reshape(-1)),    # mode wild type
+        list(np.argwhere(wild_dist == wild_dist.max()).reshape(-1)),  # mode wild type
 
         list(health),
         mean_health,
@@ -176,8 +182,7 @@ cols = [
 ]
 
 
-def start(conn_str, table_name, inits, estims, ls, ns, sel_types, pxs, types, run_id_n=5):
-
+def start(conn_str, table_name, inits, estims, ls, sel_types, pxs, types, run_id_n=5):
     sql_insert = f"""
     INSERT INTO {table_name} ({','.join(cols)})
     VALUES %s;
@@ -188,21 +193,21 @@ def start(conn_str, table_name, inits, estims, ls, ns, sel_types, pxs, types, ru
             for estim in estims:
                 for sel_type in sel_types:
                     for size_type in types:
+                        n = N_POP[size_type]
                         for l in ls:
-                            for n in ns:
-                                print((init, estim, l, n, sel_type))
-                                px = pxs[(l, n, sel_type)]
-                                for i in range(run_id_n):
-                                    run(
-                                        cursor,
-                                        conn,
-                                        i,
-                                        l,
-                                        n,
-                                        px,
-                                        sql_insert,
-                                        estim,
-                                        init,
-                                        sel_type,
-                                        size_type
-                                    )
+                            print((init, estim, l, n, sel_type))
+                            px = pxs[(l, n, sel_type)]
+                            for i in range(run_id_n):
+                                run(
+                                    cursor,
+                                    conn,
+                                    i,
+                                    l,
+                                    n,
+                                    px,
+                                    sql_insert,
+                                    estim,
+                                    init,
+                                    sel_type,
+                                    size_type
+                                )
