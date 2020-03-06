@@ -1,5 +1,6 @@
 import random
 import numpy as np
+from psycopg2.extras import execute_values
 from scipy import stats
 import estimation
 
@@ -21,7 +22,7 @@ def generate_locus_roles(size: int) -> np.ndarray:
     :param size: l param
     """
 
-    roles = np.zeros(size)
+    roles = np.zeros(size, dtype=np.int8)
     good_initial = round(size * GOOD_INITIAL_PERCENT / 100)
     good_others = round(size * GOOD_OTHERS_PERCENT / 100)
     bad = round(size * BAD_PERCENT / 100)
@@ -35,6 +36,26 @@ def generate_locus_roles(size: int) -> np.ndarray:
     lethal_inds = list(set(tail).difference(good_inds).difference(bad_inds))
     roles[lethal_inds] = LETHAL
     return roles
+
+
+def write_locuses_roles(cursor, conn, ls):
+    sql = """
+    INSERT INTO locus_helper(l, lethal_locuses, bad_locuses, good_locuses, locus_markup)
+    VALUES %s;
+    """
+
+    for l in ls:
+        ar = generate_locus_roles(l)
+        data = (
+            l,
+            list(ar == LETHAL),
+            list(ar == BAD),
+            list(ar == GOOD),
+            list(ar)
+        )
+
+        execute_values(cursor, sql, [data])
+        conn.commit()
 
 
 def mse(health):
