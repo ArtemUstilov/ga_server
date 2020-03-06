@@ -1,22 +1,19 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas.io.sql as sqlio
-from mpl_toolkits import mplot3d
 
 from database import open_db_cursor
 
 with open_db_cursor('') as (cur, conn):
     sql = f"""
-        SELECT L, N, test_px
+        SELECT L, test_px
         FROM task1_aggr_gcloud_test_visualize
-        WHERE L>=20 AND L <= 150
+        WHERE N = 195
         ORDER BY L, N
         """
 
     df = sqlio.read_sql_query(sql, conn)
     data = df.to_numpy()
+    plt.plot(data[:, 0], data[:, 1])
 
-    ax = plt.axes(projection='3d')
-    ax.plot_trisurf(data[:, 0], data[:, 1], data[:, 2],
-                    cmap='viridis', edgecolor='none')
     plt.show()
