@@ -5,7 +5,7 @@ def hamming_distance(population: np.ndarray) -> np.ndarray:
     return population.sum(1, dtype=np.int32)
 
 
-def const(population: np.ndarray) -> np.ndarray:
+def const(population: np.ndarray, *args, **kwargs) -> np.ndarray:
     return np.zeros(population.shape[0], dtype=np.int32) + population.shape[1]
 
 
