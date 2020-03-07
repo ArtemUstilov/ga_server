@@ -178,7 +178,7 @@ cols = [
 ]
 
 
-def start(conn_str, table_name, inits, estims, ls, ns, sel_types, pxs, run_id_n=5):
+def start(conn_str, table_name, inits, estims, ls, ns, sel_types, pxs, run_ids):
     sql_insert = f"""
     INSERT INTO {table_name} ({','.join(cols)})
     VALUES %s;
@@ -192,7 +192,7 @@ def start(conn_str, table_name, inits, estims, ls, ns, sel_types, pxs, run_id_n=
                         for n in ns:
                             print((init, estim, l, n, sel_type))
                             px = pxs[(l, n, sel_type)]
-                            for i in range(run_id_n):
+                            for i in run_ids:
                                 run(
                                     cursor,
                                     conn,
