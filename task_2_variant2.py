@@ -134,8 +134,8 @@ def store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, it,
         abs(pop.shape[1] - health.max()),  # Difference between best health and average
     )
 
-    # execute_values(cursor, sql_script, [data])
-    # conn.commit()
+    execute_values(cursor, sql_script, [data])
+    conn.commit()
 
 
 cols = [
