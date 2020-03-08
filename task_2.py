@@ -4,8 +4,8 @@ import numpy as np
 from psycopg2.extras import execute_values
 
 from database import open_db_cursor
-from estimation import const as all_l
-from initialization import all_zeros as all_0
+from estimation import const as all_l, on_split_locuses
+from initialization import all_zeros as all_0, init_good_by_normal_distribution as normal
 from mutation import mutate
 from selection import roulette as rws, tournament_2, tournament_4, tournament_12
 from utils import pairwise_hamming_distribution, ideal_hamming_distribution, \
@@ -16,10 +16,12 @@ N_IT = 20000
 
 INIT_MAP = {
     'all_0': all_0,
+    'normal': normal,
 }
 
 ESTIM_MAP = {
-    'all_l': all_l
+    'all_l': all_l,
+    'on_split_locuses': on_split_locuses,
 }
 
 SELECTION_MAP = {
@@ -31,12 +33,22 @@ SELECTION_MAP = {
 
 
 def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type):
+    cursor.execute(
+        f"SELECT good_locuses, bad_locuses, lethal_locuses  FROM locus_helper WHERE l={l}")
+    row = cursor.fetchone()
+
+    kwargs = {
+        'good': np.array(row[0], dtype=np.int8),
+        'bad': np.array(row[1], dtype=np.int8),
+        'lethal': np.array(row[2], dtype=np.int8)
+    }
+
     estimation = ESTIM_MAP[estim]
     initialization = INIT_MAP[init]
     selection = SELECTION_MAP[sel_type]
 
-    pop = initialization(n, l)
-    health = estimation(pop)
+    pop = initialization(n, l, **kwargs)
+    health = estimation(pop, **kwargs)
 
     store_in_db(cursor, conn, sql_script, run_id, pop, health, health.mean(), 0, init, estim,
                 sel_type)
@@ -44,7 +56,7 @@ def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type):
     for i in range(1, N_IT):
         pop = selection(pop, health, n)
         pop = mutate(pop, px)
-        health = estimation(pop)
+        health = estimation(pop, **kwargs)
         mean_health = health.mean()
         store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, i,
                     init, estim, sel_type)
@@ -103,14 +115,13 @@ def store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, it,
         wild_dist.min(),
         wild_dist.max(),
 
-        ham_std / ham_e_val if ham_e_val != 0 else None,        # variance coef ham
+        ham_std / ham_e_val if ham_e_val != 0 else None,  # variance coef ham
         ideal_std / ideal_e_val if ideal_e_val != 0 else None,  # variance coef ideal
-        wild_std / wild_e_val if wild_e_val != 0 else None,     # variance coef wild
+        wild_std / wild_e_val if wild_e_val != 0 else None,  # variance coef wild
 
-
-        list(np.argwhere(ham_dist == ham_dist.max()).reshape(-1)),      # mode hamming pairwise
+        list(np.argwhere(ham_dist == ham_dist.max()).reshape(-1)),  # mode hamming pairwise
         list(np.argwhere(ideal_dist == ideal_dist.max()).reshape(-1)),  # mode ideal
-        list(np.argwhere(wild_dist == wild_dist.max()).reshape(-1)),    # mode wild type
+        list(np.argwhere(wild_dist == wild_dist.max()).reshape(-1)),  # mode wild type
 
         list(health),
         mean_health,
@@ -167,8 +178,7 @@ cols = [
 ]
 
 
-def start(conn_str, table_name, inits, estims, ls, ns, sel_types, pxs, run_id_n=5):
-
+def start(conn_str, table_name, inits, estims, ls, ns, sel_types, pxs, run_ids):
     sql_insert = f"""
     INSERT INTO {table_name} ({','.join(cols)})
     VALUES %s;
@@ -182,7 +192,7 @@ def start(conn_str, table_name, inits, estims, ls, ns, sel_types, pxs, run_id_n=
                         for n in ns:
                             print((init, estim, l, n, sel_type))
                             px = pxs[(l, n, sel_type)]
-                            for i in range(run_id_n):
+                            for i in run_ids:
                                 run(
                                     cursor,
                                     conn,

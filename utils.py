@@ -3,6 +3,7 @@ import numpy as np
 from psycopg2.extras import execute_values
 from scipy import stats
 import estimation
+from database import open_db_cursor
 
 GOOD_INITIAL_PERCENT = 13.5
 GOOD_OTHERS_PERCENT = 24.5
@@ -142,3 +143,13 @@ def wild_type_hamming_distribution(population):
 
     return d
 
+
+def get_pxs(conn_str, factor=1):
+    with open_db_cursor(conn_str) as (cursor, conn):
+        cursor.execute("SELECT L, N, type, final_px FROM final_pxs;")
+        rows = cursor.fetchall()
+        res = {
+            (row[0], row[1], row[2]): row[3] * factor
+            for row in rows
+        }
+    return res
