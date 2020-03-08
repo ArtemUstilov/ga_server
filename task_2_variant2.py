@@ -53,6 +53,8 @@ def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type, size_
                 sel_type, size_pop_type)
     succ = False
     for i in range(1, N_IT):
+        if i%50 == 0:
+            print(i)
         pop = selection(pop, health, size_pop(i))
         pop = mutate(pop, px)
         health = estimation(pop)
