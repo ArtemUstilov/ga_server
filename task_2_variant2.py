@@ -3,7 +3,8 @@ import math
 import numpy as np
 from psycopg2.extras import execute_values
 
-from count_next_population_sizes import next_population_size_type_1, next_population_size_type_2
+from count_next_population_sizes import next_population_size_type_1, next_population_size_type_2, \
+    next_population_size_type_3, next_population_size_type_4
 from database import open_db_cursor
 from estimation import const as all_l
 from initialization import all_zeros as all_0
@@ -33,11 +34,15 @@ SELECTION_MAP = {
 SIZE_POP = {
     'type_1': next_population_size_type_1,
     'type_2': next_population_size_type_2,
+    'type_3': next_population_size_type_3,
+    'type_4': next_population_size_type_4,
 }
 
 N_POP = {
     'type_1': 1000,
     'type_2': 2000,
+    'type_3': 2000,
+    'type_4': 2000,
 }
 
 
@@ -46,7 +51,7 @@ def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type, size_
     initialization = INIT_MAP[init]
     selection = SELECTION_MAP[sel_type]
     size_pop = SIZE_POP[size_pop_type]
-    pop = initialization(size_pop(0), l)
+    pop = initialization(size_pop(0, 1), l)
     health = estimation(pop)
 
     store_in_db(cursor, conn, sql_script, run_id, pop, health, health.mean(), 0, init, estim,
@@ -55,7 +60,7 @@ def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type, size_
     for i in range(1, N_IT):
         if i%50 == 0:
             print(i)
-        pop = selection(pop, health, size_pop(i))
+        pop = selection(pop, health, size_pop(i, len(pop)))
         pop = mutate(pop, px)
         health = estimation(pop)
         mean_health = health.mean()
