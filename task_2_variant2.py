@@ -49,13 +49,9 @@ N_POP = {
 
 
 def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type, size_pop_type):
-    try:
-        cursor.execute(
-            f"SELECT good_locuses, bad_locuses, lethal_locuses  FROM locus_helper WHERE l={l}")
-    except RuntimeError:
-        print(RuntimeError)
+    cursor.execute(
+        f"SELECT good_locuses, bad_locuses, lethal_locuses  FROM locus_helper WHERE l={l}")
     row = cursor.fetchone()
-    print(row)
     kwargs = {
         'good': np.array(row[0], dtype=np.int8),
         'bad': np.array(row[1], dtype=np.int8),
