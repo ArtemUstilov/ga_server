@@ -49,12 +49,22 @@ N_POP = {
 
 
 def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type, size_pop_type):
+    cursor.execute(
+        f"SELECT good_locuses, bad_locuses, lethal_locuses  FROM locus_helper WHERE l={l}")
+    row = cursor.fetchone()
+
+    kwargs = {
+        'good': np.array(row[0], dtype=np.int8),
+        'bad': np.array(row[1], dtype=np.int8),
+        'lethal': np.array(row[2], dtype=np.int8)
+    }
+
     estimation = ESTIM_MAP[estim]
     initialization = INIT_MAP[init]
     selection = SELECTION_MAP[sel_type]
     size_pop = SIZE_POP[size_pop_type]
-    pop = initialization(size_pop(0, 1), l)
-    health = estimation(pop)
+    pop = initialization(size_pop(0, 1), l,  **kwargs)
+    health = estimation(pop,  **kwargs)
 
     store_in_db(cursor, conn, sql_script, run_id, pop, health, health.mean(), 0, init, estim,
                 sel_type, size_pop_type)
@@ -64,7 +74,7 @@ def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type, size_
             print(i)
         pop = selection(pop, health, size_pop(i, len(pop)))
         pop = mutate(pop, px)
-        health = estimation(pop)
+        health = estimation(pop,  **kwargs)
         mean_health = health.mean()
         store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, i,
                     init, estim, sel_type, size_pop_type)
