@@ -16,3 +16,9 @@ def next_population_size_type_3(_, prev_size):
 
 def next_population_size_type_4(iteration, _):
     return min(iteration+1, 2000)
+
+
+def next_population_size_type_3_init_200(iteration, prev_size):
+    if iteration == 0:
+        return 200
+    return int(min(2000, max(prev_size+1, prev_size*1.005)))

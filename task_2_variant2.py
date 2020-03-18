@@ -4,7 +4,7 @@ import numpy as np
 from psycopg2.extras import execute_values
 
 from count_next_population_sizes import next_population_size_type_1, next_population_size_type_2, \
-    next_population_size_type_3, next_population_size_type_4
+    next_population_size_type_3, next_population_size_type_4, next_population_size_type_3_init_200
 from database import open_db_cursor
 from estimation import const as all_l, on_split_locuses
 from initialization import all_zeros as all_0, init_good_by_normal_distribution as normal
@@ -38,6 +38,7 @@ SIZE_POP = {
     'type_2': next_population_size_type_2,
     'type_3': next_population_size_type_3,
     'type_4': next_population_size_type_4,
+    'type_3_init_200': next_population_size_type_3_init_200,
 }
 
 N_POP = {
@@ -45,6 +46,7 @@ N_POP = {
     'type_2': 2000,
     'type_3': 2000,
     'type_4': 2000,
+    'type_3_init_200': 2000,
 }
 
 
