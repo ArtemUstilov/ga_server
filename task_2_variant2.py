@@ -49,8 +49,11 @@ N_POP = {
 
 
 def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type, size_pop_type):
-    cursor.execute(
-        f"SELECT good_locuses, bad_locuses, lethal_locuses  FROM locus_helper WHERE l={l}")
+    try:
+        cursor.execute(
+            f"SELECT good_locuses, bad_locuses, lethal_locuses  FROM locus_helper WHERE l={l}")
+    except RuntimeError:
+        print(RuntimeError)
     row = cursor.fetchone()
     print(row)
     kwargs = {
