@@ -17,12 +17,12 @@ EPS = 0.0001
 N_IT = 20000
 
 INIT_MAP = {
-    # 'all_0': all_0,
+    'all_0': all_0,
     'normal': normal,
 }
 
 ESTIM_MAP = {
-    # 'all_l': all_l,
+    'all_l': all_l,
     'on_split_locuses': on_split_locuses,
 }
 
