@@ -6,8 +6,8 @@ from psycopg2.extras import execute_values
 from count_next_population_sizes import next_population_size_type_1, next_population_size_type_2, \
     next_population_size_type_3, next_population_size_type_4
 from database import open_db_cursor
-from estimation import const as all_l
-from initialization import all_zeros as all_0
+from estimation import const as all_l, on_split_locuses
+from initialization import all_zeros as all_0, init_good_by_normal_distribution as normal
 from mutation import mutate
 from selection import roulette as rws, tournament_2, tournament_4, tournament_12
 from utils import pairwise_hamming_distribution, ideal_hamming_distribution, \
@@ -17,11 +17,13 @@ EPS = 0.0001
 N_IT = 20000
 
 INIT_MAP = {
-    'all_0': all_0,
+    # 'all_0': all_0,
+    'normal': normal,
 }
 
 ESTIM_MAP = {
-    'all_l': all_l
+    # 'all_l': all_l,
+    'on_split_locuses': on_split_locuses,
 }
 
 SELECTION_MAP = {
