@@ -39,8 +39,8 @@ SIZE_POP = {
     'type_3': next_population_size_type_3,
     'type_4': next_population_size_type_4,
     'type_3_init_200': next_population_size_type_3_init_200,
-    'type_3_init_200_px_div_10': next_population_size_type_3_init_200,
-    'type_3_init_200_px_mul_10': next_population_size_type_3_init_200,
+    'type_3_i_200_px0_1': next_population_size_type_3_init_200,
+    'type_3_i_200_px10': next_population_size_type_3_init_200,
 }
 
 N_POP = {
@@ -49,8 +49,8 @@ N_POP = {
     'type_3': 2000,
     'type_4': 2000,
     'type_3_init_200': 2000,
-    'type_3_init_200_px_mul_10': 2000,
-    'type_3_init_200_px_div_10': 2000,
+    'type_3_i_200_px10': 2000,
+    'type_3_i_200_px0_1': 2000,
 }
 
 
