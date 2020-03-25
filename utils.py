@@ -153,3 +153,12 @@ def get_pxs(conn_str, factor=1):
             for row in rows
         }
     return res
+
+
+def simple_polymorphous(pop):
+    l = pop.shape[0]
+    return (pop.sum(0) > 0).sum() / l
+
+
+def locus_roles_polymorphous(pop, good):
+    return (pop.sum(0) > 0).sum() / good.sum()
