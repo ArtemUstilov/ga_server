@@ -5,10 +5,10 @@ from mpl_toolkits import mplot3d
 
 from database import open_db_cursor
 
-with open_db_cursor('') as (cur, conn):
+with open_db_cursor('postgresql://misha:thesis_misha@146.148.7.100:5432/thesis') as (cur, conn):
     sql = f"""
         SELECT L, N, test_px
-        FROM task1_aggr_gcloud_test_visualize
+        FROM task1_aggr_gcloud_test_visualize2
         WHERE L>=20 AND L <= 150
         ORDER BY L, N
         """

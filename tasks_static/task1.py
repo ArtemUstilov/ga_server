@@ -4,11 +4,11 @@ import pandas as pd
 import numpy as np
 
 from database import engine
-from files import write_file
-from initialization import uniform
-from estimation import hamming_distance
-from mutation import mutate
-from selection import roulette
+from tasks_static.files import write_file
+from core.initialization import uniform
+from core.estimation import hamming_distance
+from core.mutation import mutate
+from core.selection import roulette
 from utils import (
     pairwise_hamming_distribution,
     ideal_hamming_distribution,

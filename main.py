@@ -1,14 +1,25 @@
-from task1_db import find_px, test_px, graph_px
+from database import open_db_cursor
+from tasks_static.task1_mean_h import try_px
+from tasks_static.task_2 import start
+from utils import get_pxs
 
-if __name__ == '__main__':
-    find_px('task1_aggr_gcloud_v1')
-    # test_px('task1_aggr_v5', 'task1_aggr_test_v5')
+GCLOUD_CONN_STR = ''
+CONN_STR = ''
 
-# l=100 n=200 px=0.00002 rws
-sql_select = f"""
-        SELECT id, type, l, n, cur_px 
-        FROM table_from_name
-        WHERE chosen_for_test=true AND id NOT IN (SELECT record_id FROM table_to_name
-                                                    WHERE  record_id IS NOT NULL)
-        ORDER BY type;
-    """
+
+def run_static_task2():
+    pxs = get_pxs(CONN_STR, 0.9)
+    start(CONN_STR, 'task2_full_gcloud_v1',
+          ['normal'],
+          ['on_split_locuses'],
+          [100],
+          [100],
+          ['tournament_2'],
+          pxs,
+          [1, 2, 3, 4]
+          )
+
+
+def run_static_task1_try_px():
+    with open_db_cursor(CONN_STR) as (cursor, conn):
+        try_px('task1_aggr_v6', 10, 200, 'rws', 0.00025269165039062497 * 2, cursor, conn)

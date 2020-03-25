@@ -3,13 +3,13 @@ import math
 import numpy as np
 from psycopg2.extras import execute_values
 
-from count_next_population_sizes import next_population_size_type_1, next_population_size_type_2, \
+from task_dynamic.count_next_population_sizes import next_population_size_type_1, next_population_size_type_2, \
     next_population_size_type_3, next_population_size_type_4, next_population_size_type_3_init_200
 from database import open_db_cursor
-from estimation import const as all_l, on_split_locuses
-from initialization import all_zeros as all_0, init_good_by_normal_distribution as normal
-from mutation import mutate
-from selection import roulette as rws, tournament_2, tournament_4, tournament_12
+from core.estimation import const as all_l, on_split_locuses
+from core.initialization import all_zeros as all_0, normal_with_locuses as normal
+from core.mutation import mutate
+from core.selection import roulette as rws, tournament_2, tournament_4, tournament_12
 from utils import pairwise_hamming_distribution, ideal_hamming_distribution, \
     wild_type_hamming_distribution
 

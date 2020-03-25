@@ -2,7 +2,7 @@ import random
 import numpy as np
 from psycopg2.extras import execute_values
 from scipy import stats
-import estimation
+from core import estimation
 from database import open_db_cursor
 
 GOOD_INITIAL_PERCENT = 13.5
