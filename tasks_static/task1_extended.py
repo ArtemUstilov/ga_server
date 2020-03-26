@@ -61,10 +61,9 @@ def find_px_extended(table_name, inits, estims, sels, ls, ns, progons, cursor, c
                             run_mean_h = []
                             run_poly_p1 = []
                             run_poly_p2 = []
-                            pop = init_func(n, l)
 
                             for j in range(progons):
-                                copy = np.array(pop)
+                                copy = init_func(n, l)
                                 fin_iter_num, mean_h, poly_p1, poly_p2 = run_aggr(copy,
                                                                                   estimation_func,
                                                                                   selection_func,
