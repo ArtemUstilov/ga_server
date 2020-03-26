@@ -59,12 +59,20 @@ CREATE TABLE task1_extended
     try_id          INTEGER,
     cur_px          DOUBLE PRECISION,
     runs_succ       INTEGER[],
-    mean_health     DOUBLE PRECISION[],
-    polymorphous_p  DOUBLE PRECISION[],
     count_succ      INTEGER,
     is_final        BOOLEAN,
     chosen_for_test BOOLEAN,
     is_old          BOOLEAN
+);
+
+CREATE TABLE task1_extended_run_details
+(
+    id              BIGSERIAL PRIMARY KEY,
+    run_id          INTEGER REFERENCES task1_extended(id),
+    run_number      INTEGER,
+    mean_health     DOUBLE PRECISION[],
+    polymorphous1_p DOUBLE PRECISION[],
+    polymorphous2_p DOUBLE PRECISION[]
 );
 
 CREATE TABLE task1_extended_test
