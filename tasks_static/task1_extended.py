@@ -271,7 +271,7 @@ def run_aggr(init_func, estimation_func, selection_func, l, n, px, cursor):
             'lethal': np.array(row[2], dtype=np.int8)
         })
 
-    pop = init_func(l, n, **kwargs)
+    pop = init_func(n, l, **kwargs)
     health = estimation_func(pop, **kwargs)
 
     # Start loop

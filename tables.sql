@@ -75,7 +75,7 @@ CREATE TABLE task1_extended_run_details
     polymorphous2_p DOUBLE PRECISION[]
 );
 
-CREATE TABLE task1_extended_run_details_test
+CREATE TABLE task1_extended_run_details_test_2
 (
     id              BIGSERIAL PRIMARY KEY,
     run_id          INTEGER REFERENCES task1_extended_test (id),
@@ -86,7 +86,7 @@ CREATE TABLE task1_extended_run_details_test
     polymorphous2_p DOUBLE PRECISION[]
 );
 
-CREATE TABLE task1_extended_test
+CREATE TABLE task1_extended_test_2
 (
     id             SERIAL PRIMARY KEY,
     record_id      INTEGER REFERENCES task1_extended (id),
