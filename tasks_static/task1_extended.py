@@ -18,7 +18,7 @@ INIT_MAP = {
 ESTIMATION_MAP = {
     'all_l': estimation.const,
     'l-hamming_d': estimation.inverted_hamming_distance,
-    'on_split_locuses': estimation.on_split_locuses,
+    'on_split_loc': estimation.on_split_locuses,
     'sigma_2': estimation.sigma_2,
     'sigma_4': estimation.sigma_4,
     'sigma_10': estimation.sigma_10,
