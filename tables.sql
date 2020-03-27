@@ -68,8 +68,19 @@ CREATE TABLE task1_extended
 CREATE TABLE task1_extended_run_details
 (
     id              BIGSERIAL PRIMARY KEY,
-    run_id          INTEGER REFERENCES task1_extended(id),
+    run_id          INTEGER REFERENCES task1_extended (id),
     run_number      INTEGER,
+    mean_health     DOUBLE PRECISION[],
+    polymorphous1_p DOUBLE PRECISION[],
+    polymorphous2_p DOUBLE PRECISION[]
+);
+
+CREATE TABLE task1_extended_run_details_test
+(
+    id              BIGSERIAL PRIMARY KEY,
+    run_id          INTEGER REFERENCES task1_extended_test (id),
+    run_number      INTEGER,
+    percent         INTEGER,
     mean_health     DOUBLE PRECISION[],
     polymorphous1_p DOUBLE PRECISION[],
     polymorphous2_p DOUBLE PRECISION[]
@@ -85,18 +96,15 @@ CREATE TABLE task1_extended_test
     estim          varchar(15),
     type           varchar(15),
     test_px        DOUBLE PRECISION,
-    runs_succ      BOOLEAN[],
-    mean_health    DOUBLE PRECISION[],
-    polymorphous_p DOUBLE PRECISION[],
+    runs_succ      INTEGER[],
     count_succ     INTEGER,
     test_px120     DOUBLE PRECISION,
-    runs_succ120   BOOLEAN[],
+    runs_succ120   INTEGER[],
     count_succ120  INTEGER,
     test_px80      DOUBLE PRECISION,
-    runs_succ80    BOOLEAN[],
+    runs_succ80    INTEGER[],
     count_succ80   INTEGER,
-    is_old         BOOLEAN
-
+    is_old         BOOLEAN DEFAULT False
 );
 
 CREATE TABLE task2_full

@@ -63,8 +63,7 @@ def find_px_extended(table_name, inits, estims, sels, ls, ns, progons, cursor, c
                             run_poly_p2 = []
 
                             for j in range(progons):
-                                copy = init_func(n, l)
-                                fin_iter_num, mean_h, poly_p1, poly_p2 = run_aggr(copy,
+                                fin_iter_num, mean_h, poly_p1, poly_p2 = run_aggr(init_func,
                                                                                   estimation_func,
                                                                                   selection_func,
                                                                                   l, n, px,
@@ -108,7 +107,157 @@ def find_px_extended(table_name, inits, estims, sels, ls, ns, progons, cursor, c
                         print('!')
 
 
-def run_aggr(pop, estimation_func, selection_func, l, n, px, cursor):
+def test_px_extended(table_from_name,
+                     table_to_name,
+                     table_details_name,
+                     progons, cursor, conn, rows=None, add_select=''):
+    sql_select = f"""
+        SELECT id, init, estim, type, l, n, cur_px
+        FROM {table_from_name}
+        WHERE chosen_for_test=true AND id NOT IN (SELECT record_id FROM {table_to_name} 
+                                                    WHERE  record_id IS NOT NULL)
+            {add_select}
+        ORDER BY type;
+    """
+
+    sql_insert_test = f"""
+    INSERT INTO {table_to_name} ({','.join(cols_aggr_test)})
+    VALUES %s
+    RETURNING id;
+    """
+
+    sql_insert2 = f"""
+        INSERT INTO {table_details_name} ({','.join(cols_details_percent)})
+        VALUES %s;
+        """
+
+    if not rows:
+        cursor.execute(sql_select)
+        rows = cursor.fetchall()
+
+    for (rec_id, init, estim, sel_type, l, n, cur_px) in rows:
+        print((rec_id, init, estim, sel_type, l, n, cur_px))
+        init_func = INIT_MAP[init]
+        estimation_func = ESTIMATION_MAP[estim]
+        selection_func = SELECTION_MAP[sel_type]
+
+        # Testing px
+        count_successful = 0
+        run_results = []
+        mean_h_ar = []
+        poly_p1s = []
+        poly_p2s = []
+        for j in range(progons):
+            successful, mean_health, poly_p1, poly_p2 = run_aggr(init_func,
+                                                                 estimation_func,
+                                                                 selection_func,
+                                                                 l, n, cur_px,
+                                                                 cursor)
+            run_results.append(successful)
+            mean_h_ar.append(mean_health)
+            poly_p1s.append(poly_p1)
+            poly_p2s.append(poly_p2)
+            if successful + 1 < N_IT:
+                count_successful += 1
+        print('1:', run_results)
+
+        # Testing 1.2*px
+        px120 = 1.2 * cur_px
+        count_successful120 = 0
+        mean_h_ar120 = []
+        poly_p1s120 = []
+        poly_p2s120 = []
+        run_results120 = []
+        for j in range(progons):
+            successful, mean_health, poly_p1, poly_p2 = run_aggr(init_func,
+                                                                 estimation_func,
+                                                                 selection_func,
+                                                                 l, n, px120,
+                                                                 cursor)
+            run_results120.append(successful)
+            mean_h_ar120.append(mean_health)
+            poly_p1s120.append(poly_p1)
+            poly_p2s120.append(poly_p2)
+            if successful + 1 < N_IT:
+                count_successful120 += 1
+
+        print('2:', run_results120)
+        # Testing 0.8*px
+        px80 = 0.8 * cur_px
+        count_successful80 = 0
+        run_results80 = []
+        mean_h_ar80 = []
+        poly_p1s80 = []
+        poly_p2s80 = []
+        run_results120 = []
+        for j in range(progons):
+            successful, mean_health, poly_p1, poly_p2 = run_aggr(init_func,
+                                                                 estimation_func,
+                                                                 selection_func,
+                                                                 l, n, px80,
+                                                                 cursor)
+            run_results80.append(successful)
+            mean_h_ar80.append(mean_health)
+            poly_p1s80.append(poly_p1)
+            poly_p2s80.append(poly_p2)
+            if successful + 1 < N_IT:
+                count_successful80 += 1
+        print('3:', run_results80)
+
+        data = (
+            rec_id,
+            l,
+            n,
+            init,
+            estim,
+            sel_type,
+            cur_px,
+            run_results,
+            count_successful,
+            px120,
+            run_results120,
+            count_successful120,
+            px80,
+            run_results80,
+            count_successful80,
+        )
+
+        execute_values(cursor, sql_insert_test, [data])
+        conn.commit()
+        res = cursor.fetchall()
+
+        data2 = [(
+            res[0][0],
+            i,
+            100,
+            mean_h_ar[i],
+            poly_p1s[i],
+            poly_p2s[i]
+        ) for i in range(len(run_results))]
+        execute_values(cursor, sql_insert2, data2)
+
+        data2 = [(
+            res[0][0],
+            i,
+            120,
+            mean_h_ar120[i],
+            poly_p1s120[i],
+            poly_p2s120[i]
+        ) for i in range(len(run_results))]
+        execute_values(cursor, sql_insert2, data2)
+
+        data2 = [(
+            res[0][0],
+            i,
+            80,
+            mean_h_ar80[i],
+            poly_p1s80[i],
+            poly_p2s80[i]
+        ) for i in range(len(run_results))]
+        execute_values(cursor, sql_insert2, data2)
+
+
+def run_aggr(init_func, estimation_func, selection_func, l, n, px, cursor):
     kwargs = {}
     if 'locuses' in estimation_func.__name__ or 'locuses' in selection_func.__name__:
         cursor.execute(
@@ -121,6 +270,7 @@ def run_aggr(pop, estimation_func, selection_func, l, n, px, cursor):
             'lethal': np.array(row[2], dtype=np.int8)
         })
 
+    pop = init_func(l, n, **kwargs)
     health = estimation_func(pop, **kwargs)
 
     # Start loop
@@ -170,9 +320,36 @@ cols_aggr = [
     'chosen_for_test',
 ]
 
+cols_aggr_test = [
+    'record_id',
+    'L',
+    'N',
+    'init',
+    'estim',
+    'type',
+    'test_px',
+    'runs_succ',
+    'count_succ',
+    'test_px120',
+    'runs_succ120',
+    'count_succ120',
+    'test_px80',
+    'runs_succ80',
+    'count_succ80',
+]
+
 cols_details = [
     'run_id',
     'run_number',
+    'mean_health',
+    'polymorphous1_p',
+    'polymorphous2_p'
+]
+
+cols_details_percent = [
+    'run_id',
+    'run_number',
+    'percent',
     'mean_health',
     'polymorphous1_p',
     'polymorphous2_p'
