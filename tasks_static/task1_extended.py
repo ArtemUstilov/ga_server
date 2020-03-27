@@ -12,7 +12,7 @@ INIT_MAP = {
     'all_0': initialization.all_zeros,
     'uniform': initialization.uniform,
     'normal': initialization.normal,
-    'normal_with_locuses': initialization.normal_with_locuses,
+    'normal_with_loc': initialization.normal_with_locuses,
 }
 
 ESTIMATION_MAP = {
@@ -190,7 +190,6 @@ def test_px_extended(table_from_name,
         mean_h_ar80 = []
         poly_p1s80 = []
         poly_p2s80 = []
-        run_results120 = []
         for j in range(progons):
             successful, mean_health, poly_p1, poly_p2 = run_aggr(init_func,
                                                                  estimation_func,
