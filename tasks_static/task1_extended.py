@@ -43,6 +43,7 @@ def find_px_extended(table_name, inits, estims, sels, ls, ns, progons, cursor, c
         VALUES %s
         RETURNING id;
     """
+
     for init in inits:
         init_func = INIT_MAP[init]
         for estim in estims:
