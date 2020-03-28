@@ -282,9 +282,9 @@ def run_aggr(init_func, estimation_func, selection_func, l, n, px, cursor):
     mean_health_ar = []
 
     for i in range(0, N_IT):
-        pop = selection_func(pop, health, n, **kwargs)
+        pop = selection_func(pop, health, n)
         pop = mutate(pop, px)
-        health = estimation_func(pop)
+        health = estimation_func(pop, **kwargs)
         mean_health = health.mean()
         mean_health_ar.append(mean_health)
 
