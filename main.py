@@ -1,14 +1,33 @@
-from task1_db import find_px, test_px, graph_px
+from task_2_variant2 import start, INIT_MAP, ESTIM_MAP, SELECTION_MAP
 
 if __name__ == '__main__':
-    find_px('task1_aggr_gcloud_v1')
-    # test_px('task1_aggr_v5', 'task1_aggr_test_v5')
-
-# l=100 n=200 px=0.00002 rws
-sql_select = f"""
-        SELECT id, type, l, n, cur_px 
-        FROM table_from_name
-        WHERE chosen_for_test=true AND id NOT IN (SELECT record_id FROM table_to_name
-                                                    WHERE  record_id IS NOT NULL)
-        ORDER BY type;
-    """
+    conn_str = "dbname=%s host=%s port=%d user=%s password=%s" % \
+               ("thesis", "146.148.7.100", 5432, "postgres", "123123Aa")
+    start(
+        conn_str,
+        "task_2_variant_2",
+        ['normal'],
+        ['on_split_locuses'],
+        [200],
+        ['rws'],
+        {
+            (10, 1000, 'rws'): 5.43884e-05 * 0.9,
+            (20, 1000, 'rws'): 2.37305e-05 * 0.9,
+            (80, 1000, 'rws'): 4.3808e-06 * 0.9,
+            (200, 1000, 'rws'): 1.62598e-06 * 0.9,
+            (10, 2000, 'rws'): 2.72217e-05 * 0.9,
+            (20, 2000, 'rws'): 1.26343e-05 * 0.9,
+            (80, 2000, 'rws'): 2.54822e-06 * 0.9,
+            (200, 2000, 'rws'): 7.69043e-07 * 0.9,
+            (10, 1000, 'tournament_2'): 5.43884e-05 * 0.9,
+            (20, 1000, 'tournament_2'): 2.37305e-05 * 0.9,
+            (80, 1000, 'tournament_2'): 4.3808e-06 * 0.9,
+            (200, 1000, 'tournament_2'): 1.62598e-06 * 0.9,
+            (10, 2000, 'tournament_2'): 2.72217e-05 * 0.9,
+            (20, 2000, 'tournament_2'): 1.26343e-05 * 0.9,
+            (80, 2000, 'tournament_2'): 2.54822e-06 * 0.9,
+            (200, 2000, 'tournament_2'): 7.69043e-07 * 0.9,
+        },
+        ['type_3_init_200'],
+        1
+    )
