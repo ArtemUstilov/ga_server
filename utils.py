@@ -2,7 +2,7 @@ import random
 import numpy as np
 from psycopg2.extras import execute_values
 from scipy import stats
-import estimation
+from core import estimation
 from database import open_db_cursor
 
 GOOD_INITIAL_PERCENT = 13.5
@@ -153,3 +153,12 @@ def get_pxs(conn_str, factor=1):
             for row in rows
         }
     return res
+
+
+def simple_polymorphous(pop, v=0, **kwargs):
+    l = pop.shape[0]
+    return (pop.sum(0) > v).sum() / l
+
+
+def locus_roles_polymorphous(pop, good, v=0,  **kwargs):
+    return (pop.sum(0) > v).sum() / good.sum()

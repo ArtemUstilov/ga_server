@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 from numpy.testing import assert_array_equal
-from estimation import hamming_distance, const, on_split_locuses
+from core.estimation import hamming_distance, const, on_split_locuses
 
 
 class TestHammingDistance(TestCase):

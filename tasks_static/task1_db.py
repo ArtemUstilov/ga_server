@@ -1,11 +1,10 @@
 from psycopg2.extras import execute_values
 
-import selection
-from database import open_db_cursor
-from estimation import hamming_distance
-from initialization import uniform
-from mutation import mutate
-from selection import roulette, tournament
+from core import selection
+from core.estimation import hamming_distance
+from core.initialization import uniform
+from core.mutation import mutate
+from core.selection import roulette
 
 EPS = 0.0001
 N_IT = 20000
@@ -118,7 +117,8 @@ def find_px(table_name, ls, ns, progons, sels, cursor, conn):
     VALUES %s;
     """
 
-    for selection_func in sels:
+    for sel in sels:
+        selection_func = SELECTION_MAP[sel]
         print('Selection:', selection_func.__name__)
         for l in ls:
             print('L:', l)
@@ -132,7 +132,7 @@ def find_px(table_name, ls, ns, progons, sels, cursor, conn):
                     run_results = []
                     run_mean_h = []
                     for j in range(progons):
-                        print(selection_func.__name__, l, n, i,  j)
+                        print(selection_func.__name__, l, n, i, j)
                         fin_iter_num, last_mean_health = run_aggr(l, n, px, selection_func)
                         run_results.append(fin_iter_num)
                         run_mean_h.append(last_mean_health)
@@ -235,16 +235,40 @@ def test_px(table_from_name, table_to_name, progons, cursor, conn, rows=None, ad
         conn.commit()
 
 
-def graph_px(sel_type, l, n, px):
+def graph_px(table_to_name, sel_type, l, n, px, cursor, conn):
     print((sel_type, l, n, px))
     # Testing px
+    sql_insert_test = f"""
+        INSERT INTO {table_to_name} ({','.join(cols_aggr_test)})
+        VALUES %s;
+        """
 
-    for step in range(11):
+    for step in range(-40, 41):
         cur_px = px + (step * 0.01) * px
         count_successful = 0
-        for j in range(50):
-            # print('j:', j)
+        run_results = []
+        for j in range(10):
             successful, last_mean_health = run_aggr(l, n, cur_px, SELECTION_MAP[sel_type])
             if successful + 1 < N_IT:
                 count_successful += 1
-        print(step, ' step:', count_successful, '; px =', cur_px)
+            run_results.append(successful)
+            print(j, ' h:', last_mean_health)
+
+        data = (
+            None,
+            l,
+            n,
+            sel_type,
+            cur_px,
+            run_results,
+            count_successful,
+            step,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+
+        execute_values(cursor, sql_insert_test, [data])
+        conn.commit()

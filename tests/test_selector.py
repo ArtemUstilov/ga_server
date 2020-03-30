@@ -1,7 +1,7 @@
 from unittest import TestCase
 import numpy as np
 
-from selection import roulette
+from core.selection import roulette
 
 
 class TestSelector(TestCase):
