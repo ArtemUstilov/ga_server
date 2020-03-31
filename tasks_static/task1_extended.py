@@ -306,6 +306,74 @@ def run_aggr(init_func, estimation_func, selection_func, l, n, px, cursor):
     return final_iter_num, mean_health_ar, poly_d1, poly_d2
 
 
+def rin_with_conditions(init, estim, sel_type, l, n, px, progons,
+                        table_to_name, table_details_name, note, cursor=None, conn=None):
+    sql_insert_test = f"""
+    INSERT INTO {table_to_name} ({','.join(cols_aggr_test)}, note)
+    VALUES %s
+    RETURNING id;
+    """
+
+    sql_insert2 = f"""
+        INSERT INTO {table_details_name} ({','.join(cols_details_percent)})
+        VALUES %s;
+        """
+
+    init_func = INIT_MAP[init]
+    estimation_func = ESTIMATION_MAP[estim]
+    selection_func = SELECTION_MAP[sel_type]
+    run_results = []
+    mean_h_ar = []
+    poly_p1s = []
+    poly_p2s = []
+    count_successful = 0
+    for j in range(progons):
+        successful, mean_health, poly_p1, poly_p2 = run_aggr(init_func,
+                                                             estimation_func,
+                                                             selection_func,
+                                                             l, n, px,
+                                                             cursor)
+        run_results.append(successful)
+        mean_h_ar.append(mean_health)
+        poly_p1s.append(poly_p1)
+        poly_p2s.append(poly_p2)
+        if successful + 1 < N_IT:
+            count_successful += 1
+
+    data = (
+        None,
+        l,
+        n,
+        init,
+        estim,
+        sel_type,
+        px,
+        run_results,
+        count_successful,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        note,
+    )
+
+    execute_values(cursor, sql_insert_test, [data])
+    conn.commit()
+    res = cursor.fetchall()
+
+    data2 = [(
+        res[0][0],
+        i,
+        100,
+        mean_h_ar[i],
+        poly_p1s[i],
+        poly_p2s[i]
+    ) for i in range(len(run_results))]
+    execute_values(cursor, sql_insert2, data2)
+
+
 cols_aggr = [
     'L',
     'N',
