@@ -4,14 +4,14 @@ import numpy as np
 from psycopg2.extras import execute_values
 
 from task_dynamic.count_next_population_sizes import next_population_size_type_1, next_population_size_type_2, \
-    next_population_size_type_3, next_population_size_type_4, next_population_size_type_3_init_200
+    next_population_size_type_3, next_population_size_type_4, next_population_size_type_3_init_200, next_population_size_type_3_init_200_increase_from_500
 from database import open_db_cursor
 from core.estimation import const as all_l, on_split_locuses
 from core.initialization import all_zeros as all_0, normal_with_locuses as normal
 from core.mutation import mutate
 from core.selection import roulette as rws, tournament_2, tournament_4, tournament_12
 from utils import pairwise_hamming_distribution, ideal_hamming_distribution, \
-    wild_type_hamming_distribution
+    wild_type_hamming_distribution, locus_roles_polymorphous
 
 EPS = 0.0001
 N_IT = 20000
@@ -41,6 +41,7 @@ SIZE_POP = {
     'type_3_init_200': next_population_size_type_3_init_200,
     'type_3_i_200_px0_1': next_population_size_type_3_init_200,
     'type_3_i_200_px10': next_population_size_type_3_init_200,
+    'type_3_i_200_if_500': next_population_size_type_3_init_200_increase_from_500,
 }
 
 N_POP = {
@@ -51,6 +52,7 @@ N_POP = {
     'type_3_init_200': 2000,
     'type_3_i_200_px10': 2000,
     'type_3_i_200_px0_1': 2000,
+    'type_3_i_200_if_500': 2000,
 }
 
 
@@ -72,7 +74,7 @@ def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type, size_
     health = estimation(pop,  **kwargs)
 
     store_in_db(cursor, conn, sql_script, run_id, pop, health, health.mean(), 0, init, estim,
-                sel_type, size_pop_type)
+                sel_type, size_pop_type, **kwargs)
     succ = False
     for i in range(1, N_IT):
         if i%50 == 0:
@@ -82,13 +84,13 @@ def run(cursor, conn, run_id, l, n, px, sql_script, estim, init, sel_type, size_
         health = estimation(pop,  **kwargs)
         mean_health = health.mean()
         store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, i,
-                    init, estim, sel_type, size_pop_type)
+                    init, estim, sel_type, size_pop_type, **kwargs)
 
     return succ
 
 
 def store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, it,
-                init, estim, sel_type, size_pop_type):
+                init, estim, sel_type, size_pop_type, good, bad, lethal):
     ham_dist = pairwise_hamming_distribution(pop)
     if ham_dist.sum() == 0:
         ham_dist_p = ham_dist
@@ -135,12 +137,12 @@ def store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, it,
         wild_e_val,
         wild_std,
 
-        ham_dist.min(),
-        ham_dist.max(),
-        ideal_dist.min(),
-        ideal_dist.max(),
-        wild_dist.min(),
-        wild_dist.max(),
+        ham_dist.argmin(),
+        ham_dist.argmax(),
+        ideal_dist.argmin(),
+        ideal_dist.argmax(),
+        wild_dist.argmin(),
+        wild_dist.argmax(),
 
         ham_std / ham_e_val if ham_e_val != 0 else None,  # variance coef ham
         ideal_std / ideal_e_val if ideal_e_val != 0 else None,  # variance coef ideal
@@ -153,7 +155,11 @@ def store_in_db(cursor, conn, sql_script, run_id, pop, health, mean_health, it,
         list(health),
         mean_health,
         abs(pop.shape[1] - mean_health),  # Difference between mean health and average
-        abs(pop.shape[1] - health.max()),  # Difference between best health and average
+        abs(pop.shape[1] - health.max()), # Difference between best health and average
+
+        locus_roles_polymorphous(pop, good),
+
+        True
     )
 
     execute_values(cursor, sql_script, [data])
@@ -203,6 +209,9 @@ cols = [
     'mean_health',
     'mean_health_diff_0',
     'best_health_diff_0',
+
+    'polymorphism',
+    'is_new'
 ]
 
 
