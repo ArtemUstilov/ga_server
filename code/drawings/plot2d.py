@@ -5,7 +5,7 @@ import pandas.io.sql as sqlio
 from database import open_db_cursor
 
 def main():
-    with open_db_cursor('postgresql://thesis:thesis@localhost:5432/thesis_bump') as (cur, conn):
+    with open_db_cursor('') as (cur, conn):
         def compare_estims():
             sql = f"""
             SELECT l * n, AVG(final_px)

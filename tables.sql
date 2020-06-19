@@ -48,6 +48,21 @@ CREATE TABLE task1_aggr_test_v4
     count_succ80  INTEGER
 );
 
+create table task1_aggr_gcloud_v3
+(
+    id              serial primary key,
+    l               integer,
+    n               integer,
+    type            varchar(15),
+    try_id          integer,
+    cur_px          double precision,
+    runs_succ       integer[],
+    count_succ      integer,
+    is_final        boolean,
+    chosen_for_test boolean,
+    is_result       boolean
+);
+
 CREATE TABLE task1_extended
 (
     id              SERIAL PRIMARY KEY,
@@ -75,10 +90,10 @@ CREATE TABLE task1_extended_run_details
     polymorphous2_p DOUBLE PRECISION[]
 );
 
-CREATE TABLE task1_extended_run_details_test_2
+CREATE TABLE task1_extended_run_details_test_3
 (
     id              BIGSERIAL PRIMARY KEY,
-    run_id          INTEGER REFERENCES task1_extended_test (id),
+    run_id          INTEGER REFERENCES task1_extended_test_3 (id),
     run_number      INTEGER,
     percent         INTEGER,
     mean_health     DOUBLE PRECISION[],
@@ -86,7 +101,7 @@ CREATE TABLE task1_extended_run_details_test_2
     polymorphous2_p DOUBLE PRECISION[]
 );
 
-CREATE TABLE task1_extended_test_2
+CREATE TABLE task1_extended_test_3
 (
     id             SERIAL PRIMARY KEY,
     record_id      INTEGER REFERENCES task1_extended (id),
@@ -152,4 +167,17 @@ CREATE TABLE task2_full
     mean_health                        DOUBLE PRECISION,
     mean_health_diff_0                 DOUBLE PRECISION,
     best_health_diff_0                 DOUBLE PRECISION
+);
+
+
+
+CREATE TABLE final_pxs_extended
+(
+    id       serial PRIMARY KEY,
+    init     varchar(15),
+    estim     varchar(15),
+    l        integer,
+    n        integer,
+    type     varchar(15),
+    final_px double precision
 );

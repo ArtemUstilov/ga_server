@@ -4,7 +4,7 @@ import pandas.io.sql as sqlio
 
 from database import open_db_cursor
 
-with open_db_cursor('postgresql://thesis:thesis@localhost:5432/thesis') as (cur, conn):
+with open_db_cursor('') as (cur, conn):
     sql = f"""
         SELECT test_px120, (select MAX(a) from unnest(runs_succ) as a) as avg
         FROM task1_visualize_mean

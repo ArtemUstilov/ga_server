@@ -4,8 +4,8 @@ from tasks_static.task_2 import start
 from utils import get_pxs
 
 
-CONN_STR = 'postgresql://thesis:thesis@localhost:5432/thesis_bump'
-GCLOUD_CONN_STR = 'postgresql://misha:thesis_misha@146.148.7.100:5432/thesis'
+CONN_STR = ''
+GCLOUD_CONN_STR = ''
 
 
 def run_static_task2():

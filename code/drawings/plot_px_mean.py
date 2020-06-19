@@ -4,7 +4,7 @@ import pandas.io.sql as sqlio
 
 from database import open_db_cursor
 
-with open_db_cursor('postgresql://misha:thesis_misha@146.148.7.100:5432/thesis') as (cur, conn):
+with open_db_cursor('') as (cur, conn):
     sql = f"""
         SELECT unnest(t1.mean_health)
         FROM task1_extended_run_details_test t1 
