@@ -1,7 +1,6 @@
 import random
 import numpy as np
 from psycopg2.extras import execute_values
-from scipy import stats
 from core import estimation
 from database import open_db_cursor
 
@@ -69,10 +68,6 @@ def average(health):
 
 def mean(health):
     return health.mean()
-
-
-def mode(health):
-    return stats.mode(health)
 
 
 def mod_diff_best(health):

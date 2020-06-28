@@ -1,15 +1,15 @@
 import numpy as np
 
 
-def all_zeros(num_ind, num_locuses, *args, **kwargs):
+def all_zeros(num_ind, num_locuses, *args, **kwargs) -> np.ndarray:
     return np.zeros((num_ind, num_locuses), dtype=np.int8)
 
 
-def uniform(num_ind, num_locuses, *args, **kwargs):
+def uniform(num_ind, num_locuses, *args, **kwargs) -> np.ndarray:
     return np.random.randint(0, 2, (num_ind, num_locuses), dtype=np.int8)
 
 
-def normal(num_ind, num_locuses, *args, **kwargs):
+def normal(num_ind, num_locuses, *args, **kwargs) -> np.ndarray:
     pop = np.zeros((num_ind, num_locuses), dtype=np.int8)
     random = np.random.RandomState(42)
     for i in range(num_ind):

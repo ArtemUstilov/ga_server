@@ -3,7 +3,7 @@ import math
 import numpy as np
 from psycopg2.extras import execute_values
 
-from task_dynamic.count_next_population_sizes import next_population_size_type_1, next_population_size_type_2, \
+from old.task_dynamic.count_next_population_sizes import next_population_size_type_1, next_population_size_type_2, \
     next_population_size_type_3, next_population_size_type_4, next_population_size_type_3_init_200, next_population_size_type_3_init_200_increase_from_500
 from database import open_db_cursor
 from core.estimation import const as all_l, on_split_locuses

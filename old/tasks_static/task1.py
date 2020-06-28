@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 from database import engine
-from tasks_static.files import write_file
+from old.tasks_static.files import write_file
 from core.initialization import uniform
 from core.estimation import hamming_distance
 from core.mutation import mutate

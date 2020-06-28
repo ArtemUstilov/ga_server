@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def hamming_distance(population: np.ndarray) -> np.ndarray:
+def hamming_distance(population: np.ndarray, *args, **kwargs) -> np.ndarray:
     return population.sum(1, dtype=np.int32)
 
 
