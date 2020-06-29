@@ -3,19 +3,22 @@ from core import initialization, estimation, selection
 EPS = 0.0001
 N_IT = 20000
 STOP_COUNT = 10
+NUM_PROGONS = 10
 NUM_PROGONS_TEST = 5
+TRY_NUM = 15
+INIT_L_SCALE = 50
 
 INIT_MAP = {
     'all_0': initialization.all_zeros,
     'uniform': initialization.uniform,
     'normal': initialization.normal,
-    'normal_with_loc': initialization.normal_with_locuses,
+    # 'normal_with_loc': initialization.normal_with_locuses,
 }
 
 ESTIMATION_MAP = {
     'all_l': estimation.const,
     'l-hamming_d': estimation.inverted_hamming_distance,
-    'on_split_loc': estimation.on_split_locuses,
+    # 'on_split_loc': estimation.on_split_locuses,
     'sigma_2': estimation.sigma_2,
     'sigma_4': estimation.sigma_4,
     'sigma_10': estimation.sigma_10,

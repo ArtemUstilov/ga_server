@@ -6,7 +6,7 @@ import psycopg2
 
 from psycopg2.extensions import register_adapter, AsIs
 from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, ForeignKey
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -45,6 +45,7 @@ class AggrRecord(Base):
     estim = Column(String(32))
     type = Column(String(32))
     try_id = Column(Integer)
+    params = Column(JSON, server_default='{}')
 
     cur_px = Column(Float)
     runs_final = Column(ARRAY(Integer))
@@ -111,7 +112,7 @@ def pop_one_row(model):
     sql = f"""
     DELETE FROM {model.__tablename__}
     WHERE id IN (SELECT id FROM {model.__tablename__} LIMIT 1)
-    RETURNING ','.join([a.name for a in model.__table__.columns]);
+    RETURNING {','.join([f'"{a.name}"' for a in model.__table__.columns])};
     """
 
     res = engine.execute(sql)

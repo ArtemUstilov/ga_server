@@ -1,9 +1,10 @@
+from time import time
 from typing import List
 
 from core.mutation import mutate
 from database import AggrRecord, Session, TestQueueRecord, AggrRecordTest, AggrTestDetails
 from task.constants import INIT_MAP, ESTIMATION_MAP, SELECTION_MAP, N_IT, EPS, STOP_COUNT, \
-    NUM_PROGONS_TEST
+    NUM_PROGONS_TEST, NUM_PROGONS, TRY_NUM, INIT_L_SCALE
 from utils import simple_polymorphous, locus_roles_polymorphous
 
 
@@ -58,10 +59,12 @@ def run_record(
     l: int,
     n: int,
     px: float,
+    try_id: int,
     progons: list,
-    note: str
-):
-    session = Session()
+    note: str,
+    session: Session,
+    method: str
+) -> AggrRecord:
     init_func = INIT_MAP[init]
     estimation_func = ESTIMATION_MAP[estim]
     selection_func = SELECTION_MAP[sel_type]
@@ -70,6 +73,7 @@ def run_record(
     poly_p1s = []
     count_successful = 0
 
+    t0 = time()
     for _ in progons:
         res = run_one_simulation(init_func, estimation_func, selection_func, l, n, px)
         successful, mean_health, poly_p1 = res
@@ -78,6 +82,10 @@ def run_record(
         poly_p1s.append(poly_p1)
         if successful + 1 < N_IT:
             count_successful += 1
+        else:
+            break
+
+    secs = time() - t0
 
     rec = AggrRecord(
         L=l,
@@ -89,10 +97,29 @@ def run_record(
         runs_final=run_results,
         count_succ=count_successful,
         note=note,
+        try_id=try_id,
     )
+
+    rec.params = {
+        'init': init,
+        'estim': estim,
+        'type': sel_type,
+        'L': l,
+        'N': n,
+        'algo': method,
+        'NUM_PROGONS': NUM_PROGONS,
+        'TRY_NUM': TRY_NUM,
+        'INIT_L_SCALE': INIT_L_SCALE,
+        'N_IT': N_IT,
+        'STOP_COUNT': STOP_COUNT,
+        'EPS': EPS,
+        'time_sec': secs
+    }
 
     session.add(rec)
     session.commit()
+
+    return rec
 
 
 def run_test(queue_record: TestQueueRecord):
