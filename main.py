@@ -1,6 +1,8 @@
 import logging
+import sys
 
 from task.runner import run_parameters
+from task.tester import run_tester
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
@@ -11,16 +13,20 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    inits = ['all_0']
-    estims = ['l-hamming_d']
-    sel_types = ['rws']
-    ls = [10, 20, 40, 60, 80, 100]
-    ns = [100, 150, 200]
-    algos = ['run_param_set', 'run_param_set_v2']
-
-    logger.info('String up processes')
-    run_parameters(inits, estims, sel_types, ls, ns, algos)
-    logger.info('Finished')
+    if len(sys.argv) > 1 and sys.argv[1] == 'test':
+        limit = 10
+        if len(sys.argv) == 3:
+            limit = sys.argv[2]
+        logger.info('Starting testing')
+        run_tester(limit)
+        logger.info('Finished testing')
+    elif len(sys.argv) > 1 and sys.argv[1] == 'run':
+        limit = 10
+        if len(sys.argv) == 3:
+            limit = sys.argv[2]
+        logger.info('Starting up processes')
+        run_parameters(limit)
+        logger.info('Finished processes')
 
 
 if __name__ == '__main__':

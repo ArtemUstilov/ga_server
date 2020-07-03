@@ -80,6 +80,7 @@ class AggrRecordTest(Base):
     runs_final_80 = Column(ARRAY(Integer))
     count_succ_80 = Column(Integer)
     note = Column(String(50), nullable=True)
+    params = Column(JSON, server_default='{}')
 
 
 class AggrTestDetails(Base):
@@ -101,8 +102,15 @@ class TestQueueRecord(Base):
     __tablename__ = 'test_queue_record'
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    record_id = Column(Integer, ForeignKey('records_tests.id'))
+    record_id = Column(Integer, ForeignKey('records.id'))
     coef = Column(Float, default=1)
+
+
+class Params(Base):
+    __tablename__ = 'params'
+
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    params = Column(JSON, server_default='{}')
 
 
 Session = sessionmaker(bind=engine)
@@ -111,7 +119,7 @@ Session = sessionmaker(bind=engine)
 def pop_one_row(model):
     sql = f"""
     DELETE FROM {model.__tablename__}
-    WHERE id IN (SELECT id FROM {model.__tablename__} LIMIT 1)
+    WHERE id IN (SELECT id FROM {model.__tablename__} ORDER BY id LIMIT 1)
     RETURNING {','.join([f'"{a.name}"' for a in model.__table__.columns])};
     """
 

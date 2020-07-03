@@ -28,6 +28,20 @@ def sigma_4(population: np.ndarray, *args, **kwargs) -> np.ndarray:
     return l - ks + ks * 4
 
 
+def sigma_20(population: np.ndarray, *args, **kwargs) -> np.ndarray:
+    l = population.shape[1]
+    ks = l - population.sum(1)
+
+    return l - ks + ks * 20
+
+
+def sigma_50(population: np.ndarray, *args, **kwargs) -> np.ndarray:
+    l = population.shape[1]
+    ks = l - population.sum(1)
+
+    return l - ks + ks * 50
+
+
 def sigma_10(population: np.ndarray, *args, **kwargs) -> np.ndarray:
     l = population.shape[1]
     ks = l - population.sum(1)

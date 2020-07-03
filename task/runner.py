@@ -1,44 +1,21 @@
-import itertools
 import logging
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import List
 
-from database import Session, TestQueueRecord
-from task.constants import TRY_NUM, NUM_PROGONS, INIT_L_SCALE, N_IT, STOP_COUNT, EPS
+from database import Session, TestQueueRecord, pop_one_row, Params
+from task.constants import TRY_NUM, NUM_PROGONS, INIT_L_SCALE, STOP_COUNT
 from task.task import run_record
 
 logger = logging.getLogger(__name__)
 
 
-def run_parameters(
-    inits: List[str],
-    estims: List[str],
-    sel_types: List[str],
-    ls: List[int],
-    ns: List[int],
-    algos: List[str],
-):
-    params = itertools.product(inits, estims, sel_types, ls, ns, algos)
+def run_parameters(limit=1):
     with ThreadPoolExecutor(max_workers=20) as executor:
-        for (init, estim, sel_type, l, n, algo) in params:
-            param = {
-                'init': init,
-                'estim': estim,
-                'sel_type': sel_type,
-                'l': l,
-                'n': n,
-                'algo': algo,
-                'NUM_PROGONS': NUM_PROGONS,
-                'TRY_NUM': TRY_NUM,
-                'INIT_L_SCALE': INIT_L_SCALE,
-                'N_IT': N_IT,
-                'STOP_COUNT': STOP_COUNT,
-                'EPS': EPS
-            }
-            executor.submit(run_helper, param)
+        for _ in range(limit):
+            executor.submit(run_helper)
 
 
-def run_helper(params):
+def run_helper():
+    params = pop_one_row(Params)
     logger.info(f'Starting with params: {params}')
     if params['algo'] == 'run_param_set':
         run_param_set(**params)
@@ -59,11 +36,13 @@ def run_param_set(
     last_success = None
     px = 1 / (INIT_L_SCALE * l)
     sigma = px * 0.5
-    progons = list(range(NUM_PROGONS))
-    for try_id in range(TRY_NUM):
+    progons = list(range(kwargs.get('NUM_PROGONS', NUM_PROGONS)))
+    try_num = kwargs.get('TRY_NUM', TRY_NUM)
+    stop_count = kwargs.get('STOP_COUNT', STOP_COUNT)
+    for try_id in range(try_num):
         record = run_record(init, estim, sel_type, l, n, px, try_id, progons, '', session,
-                            'run_param_set')
-        if record.count_succ == NUM_PROGONS:
+                            'run_param_set', stop_count, try_num)
+        if record.count_succ == len(progons):
             px += sigma
             last_success = record
         else:
@@ -83,17 +62,20 @@ def run_param_set_v2(
     sel_type: str,
     l: int,
     n: int,
+    **kwargs,
 ):
     session = Session()
     last_success = None
     left = 0
     right = 1
     px = (left + right) / (INIT_L_SCALE * l)
-    progons = list(range(NUM_PROGONS))
-    for try_id in range(TRY_NUM):
+    progons = list(range(kwargs.get('NUM_PROGONS', NUM_PROGONS)))
+    try_num = kwargs.get('TRY_NUM', TRY_NUM)
+    stop_count = kwargs.get('STOP_COUNT', STOP_COUNT)
+    for try_id in range(try_num):
         record = run_record(init, estim, sel_type, l, n, px, try_id, progons, '', session,
-                            'run_param_set_v2')
-        if record.count_succ == NUM_PROGONS:
+                            'run_param_set_v2', stop_count, try_num)
+        if record.count_succ == len(progons):
             left = px
             last_success = record
         else:

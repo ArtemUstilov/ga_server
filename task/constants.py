@@ -4,7 +4,7 @@ EPS = 0.0001
 N_IT = 20000
 STOP_COUNT = 10
 NUM_PROGONS = 10
-NUM_PROGONS_TEST = 5
+NUM_PROGONS_TEST = 10
 TRY_NUM = 15
 INIT_L_SCALE = 50
 
@@ -22,6 +22,8 @@ ESTIMATION_MAP = {
     'sigma_2': estimation.sigma_2,
     'sigma_4': estimation.sigma_4,
     'sigma_10': estimation.sigma_10,
+    'sigma_20': estimation.sigma_20,
+    'sigma_50': estimation.sigma_50,
 }
 
 SELECTION_MAP = {

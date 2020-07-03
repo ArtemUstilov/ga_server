@@ -15,6 +15,7 @@ def run_one_simulation(
     l: int,
     n: int,
     px: float,
+    stop_count=STOP_COUNT,
 ):
     kwargs = {}
 
@@ -39,7 +40,7 @@ def run_one_simulation(
             last_counter += 1
         else:
             last_counter = 0
-        if last_counter >= STOP_COUNT:
+        if last_counter >= stop_count:
             final_iter_num = i
             break
 
@@ -63,7 +64,9 @@ def run_record(
     progons: list,
     note: str,
     session: Session,
-    method: str
+    method: str,
+    stop_count=STOP_COUNT,
+    try_num=TRY_NUM,
 ) -> AggrRecord:
     init_func = INIT_MAP[init]
     estimation_func = ESTIMATION_MAP[estim]
@@ -75,7 +78,7 @@ def run_record(
 
     t0 = time()
     for _ in progons:
-        res = run_one_simulation(init_func, estimation_func, selection_func, l, n, px)
+        res = run_one_simulation(init_func, estimation_func, selection_func, l, n, px, stop_count)
         successful, mean_health, poly_p1 = res
         run_results.append(successful)
         mean_h_ar.append(mean_health)
@@ -107,11 +110,11 @@ def run_record(
         'L': l,
         'N': n,
         'algo': method,
-        'NUM_PROGONS': NUM_PROGONS,
-        'TRY_NUM': TRY_NUM,
+        'NUM_PROGONS': len(progons),
+        'TRY_NUM': try_num,
         'INIT_L_SCALE': INIT_L_SCALE,
         'N_IT': N_IT,
-        'STOP_COUNT': STOP_COUNT,
+        'STOP_COUNT': stop_count,
         'EPS': EPS,
         'time_sec': secs
     }
@@ -122,8 +125,7 @@ def run_record(
     return rec
 
 
-def run_test(queue_record: TestQueueRecord):
-    session = Session()
+def run_test(queue_record: TestQueueRecord, session) -> AggrRecordTest:
     record: AggrRecord = session.query(AggrRecord).get(queue_record.record_id)
 
     kwargs = {
@@ -143,13 +145,11 @@ def run_test(queue_record: TestQueueRecord):
     )
 
     px = record.cur_px * queue_record.coef
-    details:List[AggrTestDetails] = []
+    details: List[AggrTestDetails] = []
 
     for test_case, suffix in [(0.8, '_80'), (1, ''), (1.2, '_120')]:
         count_successful = 0
         run_results = []
-        mean_h_ar = []
-        poly_p1s = []
         cur_px = test_case * px
         setattr(instance, 'test_px' + suffix, cur_px)
 
@@ -158,22 +158,37 @@ def run_test(queue_record: TestQueueRecord):
             successful, mean_health, poly_p1 = res
 
             run_results.append(successful)
-            mean_h_ar.append(mean_health)
-            poly_p1s.append(poly_p1)
-
-            if successful + 1 < N_IT:
-                count_successful += 1
 
             details.append(AggrTestDetails(
                 percent=int(test_case * 100),
                 run_number=j,
-                mean_health=mean_h_ar,
-                polymorphous1_p=poly_p1s
+                mean_health=mean_health,
+                polymorphous1_p=poly_p1
             ))
+
+            if successful + 1 < N_IT:
+                count_successful += 1
+            else:
+                break
 
         setattr(instance, 'runs_final' + suffix, run_results)
         setattr(instance, 'count_succ' + suffix, count_successful)
 
+    instance.params = {
+        'init': record.init,
+        'estim': record.estim,
+        'type': record.type,
+        'L': record.L,
+        'N': record.N,
+        'algo': record.params.get('algo'),
+        'NUM_PROGONS': NUM_PROGONS,
+        'TRY_NUM': TRY_NUM,
+        'INIT_L_SCALE': INIT_L_SCALE,
+        'N_IT': N_IT,
+        'STOP_COUNT': STOP_COUNT,
+        'EPS': EPS,
+        'prev_coef': queue_record.coef,
+    }
     session.add(instance)
     session.commit()
 
@@ -182,3 +197,4 @@ def run_test(queue_record: TestQueueRecord):
         session.add(d)
 
     session.commit()
+    return instance
