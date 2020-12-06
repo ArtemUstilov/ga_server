@@ -2,10 +2,10 @@ from time import time
 from typing import List
 
 from core.mutation import mutate
-from database import AggrRecord, Session, TestQueueRecord, AggrRecordTest, AggrTestDetails
-from task.constants import INIT_MAP, ESTIMATION_MAP, SELECTION_MAP, N_IT, EPS, STOP_COUNT, \
+from old.database import AggrRecord, Session, TestQueueRecord, AggrRecordTest, AggrTestDetails
+from old.task.constants import INIT_MAP, ESTIMATION_MAP, SELECTION_MAP, N_IT, EPS, STOP_COUNT, \
     NUM_PROGONS_TEST, NUM_PROGONS, TRY_NUM, INIT_L_SCALE
-from utils import simple_polymorphous, locus_roles_polymorphous
+from old.utils import simple_polymorphous, locus_roles_polymorphous
 
 
 def run_one_simulation(

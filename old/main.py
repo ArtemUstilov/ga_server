@@ -1,7 +1,7 @@
-from database import open_db_cursor
+from old.database import open_db_cursor
 from old.tasks_static.task1_extended import find_px_extended, test_px_extended, rin_with_conditions
 from old.tasks_static.task_2 import start
-from utils import get_pxs
+from old.utils import get_pxs
 
 
 CONN_STR = 'postgresql://thesis:thesis@localhost:5432/thesis_bump'

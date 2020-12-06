@@ -4,3 +4,5 @@ out/
 results/
 regression/
 backup
+.DS_Store
+venv

@@ -5,8 +5,12 @@ def all_zeros(num_ind, num_locuses, *args, **kwargs) -> np.ndarray:
     return np.zeros((num_ind, num_locuses), dtype=np.int8)
 
 
-def uniform(num_ind, num_locuses, *args, **kwargs) -> np.ndarray:
-    return np.random.randint(0, 2, (num_ind, num_locuses), dtype=np.int8)
+def uniform(num_ind, num_locuses, seed=None, *args, **kwargs) -> np.ndarray:
+    if seed:
+        random = np.random.RandomState(seed)
+    else:
+        random = np.random.RandomState()
+    return random.randint(0, 2, (num_ind, num_locuses), dtype=np.int8)
 
 
 def normal(num_ind, num_locuses, *args, **kwargs) -> np.ndarray:

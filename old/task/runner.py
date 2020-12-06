@@ -1,9 +1,9 @@
 import logging
 from concurrent.futures.thread import ThreadPoolExecutor
 
-from database import Session, TestQueueRecord, pop_one_row, Params
-from task.constants import TRY_NUM, NUM_PROGONS, INIT_L_SCALE, STOP_COUNT
-from task.task import run_record
+from old.database import Session, TestQueueRecord, pop_one_row, Params
+from old.task.constants import TRY_NUM, NUM_PROGONS, INIT_L_SCALE, STOP_COUNT
+from old.task.task import run_record
 
 logger = logging.getLogger(__name__)
 

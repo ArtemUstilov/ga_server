@@ -3,13 +3,13 @@ import pandas as pd
 
 import numpy as np
 
-from database import engine
+from old.database import engine
 from old.tasks_static.files import write_file
 from core.initialization import uniform
 from core.estimation import hamming_distance
 from core.mutation import mutate
 from core.selection import roulette
-from utils import (
+from old.utils import (
     pairwise_hamming_distribution,
     ideal_hamming_distribution,
     wild_type_hamming_distribution,

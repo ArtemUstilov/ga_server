@@ -4,9 +4,8 @@ import pandas.io.sql as sqlio
 import base64
 import io
 from psycopg2.extras import execute_values
-from matplotlib.pyplot import text
 
-from database import open_db_cursor
+from old.database import open_db_cursor
 
 
 def get_first(el):

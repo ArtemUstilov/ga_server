@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from database import open_db_cursor
+from old.database import open_db_cursor
 
 with open_db_cursor('bla') as (cursor, conn):
     sql = """

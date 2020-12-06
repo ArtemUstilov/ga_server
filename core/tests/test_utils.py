@@ -1,6 +1,6 @@
 from unittest import TestCase
-import utils
-from utils import *
+from old import utils
+from old.utils import *
 
 
 class TestGenerateLocusRoles(TestCase):

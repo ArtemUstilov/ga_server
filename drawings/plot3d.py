@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas.io.sql as sqlio
-from mpl_toolkits import mplot3d
 
-from database import open_db_cursor
+from old.database import open_db_cursor
 
 with open_db_cursor('postgresql://misha:thesis_misha@146.148.7.100:5432/thesis') as (cur, conn):
     sql = f"""

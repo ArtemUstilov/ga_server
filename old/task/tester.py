@@ -1,8 +1,8 @@
 from concurrent.futures.thread import ThreadPoolExecutor
 
-from database import pop_one_row, TestQueueRecord, Session
-from task.constants import NUM_PROGONS
-from task.task import run_test
+from old.database import pop_one_row, TestQueueRecord, Session
+from old.task.constants import NUM_PROGONS
+from old.task.task import run_test
 
 
 def run_tester(limit=1):

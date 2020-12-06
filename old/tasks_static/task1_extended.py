@@ -3,7 +3,7 @@ from psycopg2.extras import execute_values
 
 from core.mutation import mutate
 from core import selection, estimation, initialization
-from utils import simple_polymorphous, locus_roles_polymorphous
+from old.utils import simple_polymorphous, locus_roles_polymorphous
 
 EPS = 0.0001
 N_IT = 20000

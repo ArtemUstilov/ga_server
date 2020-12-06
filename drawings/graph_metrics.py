@@ -1,11 +1,7 @@
-from time import sleep
-
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import animation
-from matplotlib.widgets import Slider, Button, TextBox
 import pandas.io.sql as sqlio
-from database import open_db_cursor
+from old.database import open_db_cursor
 
 
 def get_data(conn_str, l, n, sel_type, init, run_id=0):

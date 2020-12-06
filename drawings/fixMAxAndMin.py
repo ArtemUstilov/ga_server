@@ -1,12 +1,8 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas.io.sql as sqlio
-import base64
-import io
 from psycopg2.extras import execute_values
-from matplotlib.pyplot import text
 
-from database import open_db_cursor
+from old.database import open_db_cursor
 
 
 with open_db_cursor('postgresql://postgres:123123Aa@146.148.7.100:5432/thesis') as (cur, conn):
