@@ -14,9 +14,9 @@ from task_2 import models
 app = Flask(__name__)
 
 app.config['FLASK_ADMIN_SWATCH'] = 'flatly'
-app.config['SECRET_KEY'] = b'secret'
-app.config['BASIC_AUTH_USERNAME'] = 'admin'
-app.config['BASIC_AUTH_PASSWORD'] = 'admin'
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['BASIC_AUTH_USERNAME'] = os.getenv('ADMIN_USERNAME')
+app.config['BASIC_AUTH_PASSWORD'] = os.getenv('ADMIN_PASSWORD')
 app.config['BASIC_AUTH_FORCE'] = True
 
 # Add administrative views here
