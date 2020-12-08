@@ -1,4 +1,5 @@
 import json
+import os
 
 from flask import Flask, Response, redirect
 from flask_admin import Admin, AdminIndexView
@@ -93,4 +94,4 @@ admin.add_view(MyModelView(models.Log))
 admin.add_view(MyModelView(models.Task))
 admin.add_view(MyModelView(models.ParamSet))
 
-app.run()
+app.run(host='0.0.0.0', port=os.environ.get('PORT', '1249'))

@@ -1,0 +1,13 @@
+version: '3.0'
+
+services:
+  admin-panel:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ga-admin-panel
+    ports:
+      - 1249:1249
+    command: ["python", "admin.py"]
