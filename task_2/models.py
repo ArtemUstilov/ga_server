@@ -51,10 +51,10 @@ class Function(BaseModel):
 
 
 class FuncParam(BaseModel):
-    dim_n = peewee.IntegerField(null=False)
+    dim_n = peewee.SmallIntegerField(null=False)
     interval_a = peewee.DoubleField(null=False)
     interval_b = peewee.DoubleField(null=False)
-    accuracy = peewee.DoubleField(null=False)
+    accuracy_decimals = peewee.SmallIntegerField(null=False)
 
 
 class FuncCase(BaseModel):
@@ -89,6 +89,9 @@ class InitPopulation(BaseModel):
     seed = peewee.IntegerField(
         null=False
     )
+
+    dim_n = peewee.SmallIntegerField(null=False)
+    accuracy_decimals = peewee.SmallIntegerField(null=False)
 
     init_distr_hamm = ArrayField(peewee.IntegerField)
     init_distr_pairwise = ArrayField(peewee.IntegerField)
@@ -186,13 +189,17 @@ class TestSuite(BaseModel):
 
     avg_avg_health = peewee.DoubleField(null=True)
     avg_max_health = peewee.DoubleField(null=True)
+    avg_std_health = peewee.DoubleField(null=True)
 
-    avg_std_health_abs = peewee.DoubleField(null=True)
-    avg_std_health_rel = peewee.DoubleField(null=True)
+    avg_avg_health_deviation_to_opt_abs = peewee.DoubleField(null=True)
+    avg_best_health_deviation_to_opt_abs = peewee.DoubleField(null=True)
+    avg_avg_health_deviation_to_opt_rel = peewee.DoubleField(null=True)
+    avg_best_health_deviation_to_opt_rel = peewee.DoubleField(null=True)
 
     avg_eucl_d_to_extremum = peewee.DoubleField(null=True)
     avg_hamm_d_to_extremum = peewee.DoubleField(null=True)
 
+    avg_best_ind = peewee.DoubleField(null=True)
     avg_best_ind_n = peewee.DoubleField(null=True)
 
     # Best fields
@@ -202,14 +209,18 @@ class TestSuite(BaseModel):
 
     best_avg_health = peewee.DoubleField(null=True)
     best_max_health = peewee.DoubleField(null=True)
+    best_std_health = peewee.DoubleField(null=True)
 
-    best_std_health_abs = peewee.DoubleField(null=True)
-    best_std_health_rel = peewee.DoubleField(null=True)
+    best_avg_health_deviation_to_opt_abs = peewee.DoubleField(null=True)
+    best_best_health_deviation_to_opt_abs = peewee.DoubleField(null=True)
+    best_avg_health_deviation_to_opt_rel = peewee.DoubleField(null=True)
+    best_best_health_deviation_to_opt_rel = peewee.DoubleField(null=True)
 
     best_eucl_d_to_extremum = peewee.DoubleField(null=True)
     best_hamm_d_to_extremum = peewee.IntegerField(null=True)
 
-    best_best_ind_n = peewee.IntegerField(null=True)
+    best_best_ind = peewee.IntegerField(null=False)
+    best_best_ind_n = peewee.IntegerField(null=False)
 
     exp_suite_before = peewee.ForeignKeyField(
         ExperimentsSuite,
@@ -242,13 +253,17 @@ class RunSet(BaseModel):
 
     avg_avg_health = peewee.DoubleField(null=True)
     avg_max_health = peewee.DoubleField(null=True)
+    avg_std_health = peewee.DoubleField(null=True)
 
-    avg_std_health_abs = peewee.DoubleField(null=True)
-    avg_std_health_rel = peewee.DoubleField(null=True)
+    avg_avg_health_deviation_to_opt_abs = peewee.DoubleField(null=True)
+    avg_best_health_deviation_to_opt_abs = peewee.DoubleField(null=True)
+    avg_avg_health_deviation_to_opt_rel = peewee.DoubleField(null=True)
+    avg_best_health_deviation_to_opt_rel = peewee.DoubleField(null=True)
 
     avg_eucl_d_to_extremum = peewee.DoubleField(null=True)
     avg_hamm_d_to_extremum = peewee.DoubleField(null=True)
 
+    avg_best_ind = peewee.DoubleField(null=True)
     avg_best_ind_n = peewee.DoubleField(null=True)
 
     # Best fields
@@ -258,13 +273,17 @@ class RunSet(BaseModel):
 
     best_avg_health = peewee.DoubleField(null=True)
     best_max_health = peewee.DoubleField(null=True)
+    best_std_health = peewee.DoubleField(null=True)
 
-    best_std_health_abs = peewee.DoubleField(null=True)
-    best_std_health_rel = peewee.DoubleField(null=True)
+    best_avg_health_deviation_to_opt_abs = peewee.DoubleField(null=True)
+    best_best_health_deviation_to_opt_abs = peewee.DoubleField(null=True)
+    best_avg_health_deviation_to_opt_rel = peewee.DoubleField(null=True)
+    best_best_health_deviation_to_opt_rel = peewee.DoubleField(null=True)
 
     best_eucl_d_to_extremum = peewee.DoubleField(null=True)
     best_hamm_d_to_extremum = peewee.IntegerField(null=True)
 
+    best_best_ind = peewee.IntegerField(null=False)
     best_best_ind_n = peewee.IntegerField(null=False)
 
     exp_suite = peewee.ForeignKeyField(
