@@ -17,4 +17,4 @@ def get_estimation_function(param_set: ParamSet):
 
 def get_stop_cond_params(param_set: ParamSet):
     s = param_set.stop_cond
-    return s.get('steps_back', 10), s.get('MAX_ITER', 20000),  s.get('EPS', 0.0001)
+    return s.get('steps_back', 10), s.get('MAX_NFE', 10000000),  s.get('EPS', 0.0001)

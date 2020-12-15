@@ -36,6 +36,17 @@ def json_formatter(view, context, model, name):
     return Markup('<pre>{}</pre>'.format(json_value))
 
 
+def array_formatter(view, context, model, name):
+    value = getattr(model, name)
+    if not value:
+        return Markup('<pre>[]</pre>')
+
+    return Markup('<pre>[{}{}]</pre>'.format(
+        ','.join(map(str, value[:10])),
+        '...' if len(value) > 10 else '',
+    ))
+
+
 class JSONField2(JSONField):
     def _value(self):
         if self.raw_data:
@@ -44,6 +55,16 @@ class JSONField2(JSONField):
             return json.dumps(self.data, ensure_ascii=False, indent=2)
         else:
             return '{}'
+
+
+class ArrayField(JSONField):
+    def _value(self):
+        if self.raw_data:
+            return self.raw_data[0]
+        elif self.data:
+            return json.dumps(self.data, ensure_ascii=False, indent=2)
+        else:
+            return '[]'
 
 
 class MyModelView(ModelView):
@@ -55,6 +76,7 @@ class MyModelView(ModelView):
         'encoding': JSONField2,
         'stop_cond': JSONField2,
         'action_log': JSONField2,
+        'init_distr_hamm': ArrayField,
     }
     column_formatters = {
         'extra': json_formatter,
@@ -64,6 +86,11 @@ class MyModelView(ModelView):
         'encoding': json_formatter,
         'stop_cond': json_formatter,
         'action_log': json_formatter,
+        'init_distr_hamm': array_formatter,
+    }
+
+    form_widget_args = {
+        'init_distr_hamm': {'disabled': True, 'required': False}
     }
 
     def is_accessible(self):
@@ -90,8 +117,15 @@ class MyAdminIndexView(AdminIndexView):
 
 admin = Admin(app, name='GenAlgo', template_mode='bootstrap3', index_view=MyAdminIndexView())
 
+admin.add_view(MyModelView(models.Function))
+admin.add_view(MyModelView(models.FuncParam))
+admin.add_view(MyModelView(models.FuncCase))
+admin.add_view(MyModelView(models.ParamSet))
+admin.add_view(MyModelView(models.ExperimentsSuite))
+admin.add_view(MyModelView(models.TestSuite))
+admin.add_view(MyModelView(models.RunSet))
 admin.add_view(MyModelView(models.Log))
 admin.add_view(MyModelView(models.Task))
-admin.add_view(MyModelView(models.ParamSet))
+admin.add_view(MyModelView(models.InitPopulation))
 
 app.run(host='0.0.0.0', port=os.environ.get('PORT', '1249'))

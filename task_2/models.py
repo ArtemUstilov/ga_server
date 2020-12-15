@@ -49,12 +49,21 @@ class Task(BaseModel):
 class Function(BaseModel):
     alias = peewee.CharField(unique=True, max_length=50, choices=constants.ESTIMS)
 
+    def __str__(self):
+        return f'Function: {self.alias}'
+
 
 class FuncParam(BaseModel):
     dim_n = peewee.SmallIntegerField(null=False)
     interval_a = peewee.DoubleField(null=False)
     interval_b = peewee.DoubleField(null=False)
     accuracy_decimals = peewee.SmallIntegerField(null=False)
+
+    def __str__(self):
+        return (
+            f'FuncParam: n={self.dim_n} [{self.interval_a}; {self.interval_b}] '
+            f'q=10^-{self.accuracy_decimals}'
+        )
 
 
 class FuncCase(BaseModel):
@@ -93,8 +102,7 @@ class InitPopulation(BaseModel):
     dim_n = peewee.SmallIntegerField(null=False)
     accuracy_decimals = peewee.SmallIntegerField(null=False)
 
-    init_distr_hamm = ArrayField(peewee.IntegerField)
-    init_distr_pairwise = ArrayField(peewee.IntegerField)
+    init_distr_hamm = ArrayField(peewee.IntegerField, null=True)
 
 
 class ParamSet(BaseModel):

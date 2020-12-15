@@ -1,5 +1,7 @@
 import numpy as np
 
+from task_2.helpers.constants import BIN_ENCODING, GRAY_ENCODING
+
 
 def bin_to_dec(arr: np.ndarray) -> np.ndarray:
     L = arr.shape[1]
@@ -48,9 +50,9 @@ def encode(pop: np.ndarray, L: int, coder_info: dict):
     nums = nums.round().astype(np.uint64)
 
     algo = coder_info['type']
-    if algo == 'BIN':
+    if algo == BIN_ENCODING:
         return dec_to_bin(nums, L)
-    elif algo == 'GRAY':
+    elif algo == GRAY_ENCODING:
         return dec_to_gray(nums, L)
     else:
         raise ValueError(f'Coding algorithm {algo} not recognized')
@@ -66,9 +68,9 @@ def decode(pop: np.ndarray, L:int, coder_info: dict):
     """
 
     algo = coder_info['type']
-    if algo == 'BIN':
+    if algo == BIN_ENCODING:
         nums = bin_to_dec(pop)
-    elif algo == 'GRAY':
+    elif algo == GRAY_ENCODING:
         nums = gray_to_dec(pop)
     else:
         raise ValueError(f'Coding algorithm {algo} not recognized')

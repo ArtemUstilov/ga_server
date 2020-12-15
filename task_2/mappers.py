@@ -4,7 +4,6 @@ import task_2.helpers.constants as const
 from core.initialization import uniform
 from core.selection import roulette, tournament_2, tournament_4, tournament_12
 
-# TODO ask uniform
 INIT_MAP = {
     const.UNIFORM_INIT: uniform
 }

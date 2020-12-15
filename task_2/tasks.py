@@ -4,6 +4,7 @@ from typing import Optional
 import numpy as np
 
 import task_2.mappers as mappers
+from core.crossover import crossover
 from core.mutation import mutate
 from task_2.helpers.encoding import encode, decode
 from task_2.helpers.constants import TESTING_FACTORS
@@ -287,7 +288,6 @@ def process_single_run(
     # Initialization
     # pop: population with decimal values
     # pop_encoded: population represented as 1s and 0s
-    # TODO init with 1s and 0s
     pop_encoded = f_init(N, L, init_pop_seed)
     pop = decode(pop_encoded, L, coder_info)
     health = f_estim(pop)
@@ -300,7 +300,7 @@ def process_single_run(
 
     while nfe < MAX_NFE and not step > STEPS_BACK:
         pop_encoded = f_select(pop_encoded, health, N)
-        # TODO crossignover
+        pop_encoded = crossover(pop_encoded, param_set.crossover_pc)
         pop_encoded = mutate(pop_encoded, pmax)
         pop = decode(pop_encoded, L, coder_info)
         health = f_estim(pop)
