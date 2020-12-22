@@ -96,7 +96,8 @@ class InitPopulation(BaseModel):
         null=False
     )
     seed = peewee.IntegerField(
-        null=False
+        null=False,
+        unique=True,
     )
 
     dim_n = peewee.SmallIntegerField(null=False)

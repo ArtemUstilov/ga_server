@@ -12,7 +12,7 @@ def generate_param_set(func_case: FuncCase, **kwargs):
         'init': UNIFORM_INIT,
         'sel_type': RWS_SEL,
         'N': 100,
-        'stop_code': {
+        'stop_cond': {
             'steps_back': 10,
             'MAX_NFE': 10000000,
             'EPS': 0.0001,
@@ -26,7 +26,7 @@ def generate_param_set(func_case: FuncCase, **kwargs):
     params.update(kwargs)
 
     p = func_case.func_param
-    num_intervals = (p.interval_a - p.interval_b) / 10 ** p.accuracy_decimals
+    num_intervals = abs(p.interval_b - p.interval_a) * 10 ** p.accuracy_decimals
     l_val = math.log2(num_intervals)
 
     if not l_val.is_integer():

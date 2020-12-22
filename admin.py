@@ -54,7 +54,7 @@ class JSONField2(JSONField):
         elif self.data:
             return json.dumps(self.data, ensure_ascii=False, indent=2)
         else:
-            return '{}'
+            return str(self.default())
 
 
 class ArrayField(JSONField):

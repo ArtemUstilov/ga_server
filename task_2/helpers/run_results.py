@@ -1,3 +1,5 @@
+import numpy as np
+
 from task_2.models import TestSuite, Run, RunSet
 
 
@@ -123,3 +125,13 @@ def calculate_best_run_set_results(run_set_id):
     runset = _calculate_best(runset, runs)
     runset.save()
     return runset
+
+
+def pairwise_hamming_distribution(population):
+    matrix = (population[:, None, :] != population).sum(2)
+    np.fill_diagonal(matrix, -1)
+    d = np.zeros(population.shape[1], dtype=np.int64)
+    for i in range(len(d)):
+        d[i] = (matrix == i).sum() / 2
+
+    return d

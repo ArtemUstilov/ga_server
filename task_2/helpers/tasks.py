@@ -47,7 +47,7 @@ def pop_task() -> Optional[Task]:
     cursor = (
         Task
         .update(taken=True)
-        .where(Task.id << subq)
+        .where(Task.id.in_(subq))
         .returning(Task)
         .execute()
     )

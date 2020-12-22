@@ -15,7 +15,7 @@ from task_2.helpers.run_results import calculate_avg_test_results, calculate_bes
 from task_2.helpers.tasks import TaskType, create_task, remove_pending_task
 from task_2.metrics.simple import hamming_distance_between
 from task_2.models import ParamSet, RunSet, Run, TestSuite, InitPopulation, ExperimentsSuite, Task
-from old.utils import pairwise_hamming_distribution
+from task_2.helpers.run_results import pairwise_hamming_distribution
 from task_2.metrics.distributions import target_hamming_distribution
 
 logger = logging.getLogger(__name__)
