@@ -3,11 +3,11 @@ from task_2.models import ParamSet
 
 
 def get_estimation_function(param_set: ParamSet):
-    alias = param_set.function.alias
+    alias = param_set.func_case.function.alias
 
-    dim_n = param_set.function_param.dim_n
-    a = param_set.function_param.interval_a
-    b = param_set.function_param.interval_b
+    dim_n = param_set.func_case.func_param.dim_n
+    a = param_set.func_case.func_param.interval_a
+    b = param_set.func_case.func_param.interval_b
 
     if dim_n == 1:
         return lambda pop_decoded: TEST_FUNC_MAP[alias](pop_decoded, a, b)

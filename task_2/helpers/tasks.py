@@ -10,11 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class TaskType:
-    CREATE_EXP_SUITE = constants.CREATE_EXP_SUITE_TASK
-    PROCESS_TEST_SUITE = constants.PROCESS_TEST_SUITE_TASK
-    FINALIZE_TEST_SUITE = constants.FINALIZE_TEST_SUITE_TASK
-    PROCESS_RUN_SET = constants.PROCESS_RUN_SET_TASK
-    FINALIZE_RUN_SET = constants.FINALIZE_RUN_SET_TASK
+    CREATE_EXP_SUITE = constants.CREATE_EXP_SUITE_TASK[0]
+    PROCESS_TEST_SUITE = constants.PROCESS_TEST_SUITE_TASK[0]
+    FINALIZE_TEST_SUITE = constants.FINALIZE_TEST_SUITE_TASK[0]
+    PROCESS_RUN_SET = constants.PROCESS_RUN_SET_TASK[0]
+    FINALIZE_RUN_SET = constants.FINALIZE_RUN_SET_TASK[0]
 
 
 def create_task(action, pending_tasks=None, **kwargs):
@@ -42,15 +42,15 @@ def pop_task() -> Optional[Task]:
         Task
         .select(Task.id)
         .where(fn.JSON_ARRAY_LENGTH(Task.pending_tasks) == 0, Task.taken >> False)
+        .order_by(Task.id)
         .limit(1)
     )
-    cursor = (
+    query = (
         Task
         .update(taken=True)
         .where(Task.id.in_(subq))
         .returning(Task)
-        .execute()
     )
 
-    if cursor.count == 1:
-        return cursor[0]
+    for task in query.execute():
+        return task

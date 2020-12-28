@@ -38,7 +38,7 @@ def looper():
         # Run task
         try:
             task_func(task, **task.kwargs)
-        except Exception:
+        except Exception as e:
             logger.exception('Task failed', extra={'task_id': task.id}, exc_info=True)
             return
 

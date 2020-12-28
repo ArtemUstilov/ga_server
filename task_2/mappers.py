@@ -5,14 +5,14 @@ from core.initialization import uniform
 from core.selection import roulette, tournament_2, tournament_4, tournament_12
 
 INIT_MAP = {
-    const.UNIFORM_INIT: uniform
+    const.UNIFORM_INIT[0]: uniform
 }
 
 SEL_TYPE_MAP = {
-    const.RWS_SEL: roulette,
-    const.TOURNAMENT_2_SEL: tournament_2,
-    const.TOURNAMENT_4_SEL: tournament_4,
-    const.TOURNAMENT_12_SEL: tournament_12,
+    const.RWS_SEL[0]: roulette,
+    const.TOURNAMENT_2_SEL[0]: tournament_2,
+    const.TOURNAMENT_4_SEL[0]: tournament_4,
+    const.TOURNAMENT_12_SEL[0]: tournament_12,
     # TODO sus sel type
     const.SUS_SEL: None,
 }

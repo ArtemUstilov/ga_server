@@ -30,9 +30,14 @@ def _schedule_tests(**test_kwargs):
     :return: None
     """
 
-    final_task = create_task(TaskType.FINALIZE_TEST_SUITE, [None])
+    final_task = create_task(
+        TaskType.FINALIZE_TEST_SUITE,
+        [None]
+    )
     pending = []
-    kwargs = {}
+    kwargs = {
+        'is_before': 'exp_suite_before' in test_kwargs
+    }
 
     for factor in TESTING_FACTORS:
         test_suite = TestSuite(
@@ -101,7 +106,12 @@ def process_test_suite(task: Task, test_suite_id: int, finalize_id: Optional[int
 
     count_successful = 0
     for run_num in range(param_set.num_runs):
-        run = process_single_run(param_set, suite.init_pmax * suite.factor, run_num)
+        run = process_single_run(
+            param_set,
+            suite.init_pmax * suite.factor,
+            run_num,
+            test_suite_id=test_suite_id
+        )
 
         if run.is_succ:
             count_successful += 1
@@ -173,7 +183,7 @@ def finalize_test_suites(task: Task, is_before: bool, **kwargs):
         exp_suite.param_set.save()
         create_task(
             TaskType.PROCESS_RUN_SET,
-            exp_suite=exp_suite.id,
+            exp_suite_id=exp_suite.id,
             init_pmax=suite100.init_pmax,
         )
 
@@ -260,17 +270,23 @@ def process_single_run(
     run_set_id=None,
 ):
     run = Run(number=run_num)
-    init_pop_seed = InitPopulation.get(
-        function_alias=param_set.experiment.function.alias,
+    init_pop = InitPopulation.get(
         run_number=run_num,
         init=param_set.init,
         L=param_set.L,
         N=param_set.N,
-    ).seed
+        dim_n=param_set.func_case.func_param.dim_n,
+        accuracy_decimals=param_set.func_case.func_param.accuracy_decimals,
+    )
+    run.init_population = init_pop.id
+    init_pop_seed = init_pop.seed
+    # TODO init disrt
     run.init_distr_health = None
 
     # Helping vars
     coder_info = param_set.encoding
+    coder_info['a'] = param_set.func_case.func_param.interval_a
+    coder_info['b'] = param_set.func_case.func_param.interval_b
     f_init = mappers.INIT_MAP[param_set.init]
     f_select = mappers.SEL_TYPE_MAP[param_set.sel_type]
     f_estim = get_estimation_function(param_set)
@@ -321,13 +337,13 @@ def process_single_run(
     last_health = health
     last_pop_encoded = pop_encoded
 
-    run.is_succ = nfe == MAX_NFE
+    run.is_succ = nfe < MAX_NFE
     run.NFE = nfe
     run.iter_num = iter_num
 
     if run.is_succ:
         # Helping vars
-        optimal_val = np.array([param_set.function.extremum[0]])  # optimal dec X for this function
+        optimal_val = np.array([param_set.func_case.extremums[0]])  # optimal dec X for the function
         optimal_encoded = encode(optimal_val, L, coder_info)  # optimal bin/gray X for this function
         f_opt = f_estim(optimal_val)[0]  # value of function in extremum
         avg = last_health.mean()  # average value of health

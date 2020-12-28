@@ -228,12 +228,12 @@ class TestSuite(BaseModel):
     best_eucl_d_to_extremum = peewee.DoubleField(null=True)
     best_hamm_d_to_extremum = peewee.IntegerField(null=True)
 
-    best_best_ind = peewee.IntegerField(null=False)
-    best_best_ind_n = peewee.IntegerField(null=False)
+    best_best_ind = peewee.IntegerField(null=True)
+    best_best_ind_n = peewee.IntegerField(null=True)
 
     exp_suite_before = peewee.ForeignKeyField(
         ExperimentsSuite,
-        null=False,
+        null=True,
         on_delete='RESTRICT',
         lazy_load=True,
         backref='before_test_suites'
@@ -292,8 +292,8 @@ class RunSet(BaseModel):
     best_eucl_d_to_extremum = peewee.DoubleField(null=True)
     best_hamm_d_to_extremum = peewee.IntegerField(null=True)
 
-    best_best_ind = peewee.IntegerField(null=False)
-    best_best_ind_n = peewee.IntegerField(null=False)
+    best_best_ind = peewee.IntegerField(null=True)
+    best_best_ind_n = peewee.IntegerField(null=True)
 
     exp_suite = peewee.ForeignKeyField(
         ExperimentsSuite,
@@ -334,7 +334,7 @@ class Run(BaseModel):
     best_ind = peewee.DoubleField(null=True)
     best_ind_n = peewee.IntegerField(null=True)
 
-    init_distr_health = ArrayField(peewee.IntegerField)
+    init_distr_health = ArrayField(peewee.IntegerField, null=True)
 
     final_distr_hamm = ArrayField(peewee.IntegerField, null=True)
     final_distr_health = ArrayField(peewee.IntegerField, null=True)

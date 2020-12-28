@@ -23,6 +23,7 @@ class LogDbHandler(logging.Handler):
 
 log_config = {
     'version': 1,
+    'disable_existing_loggers': False,
     'handlers': {
         'db_handler': {
             'class': 'task_2.helpers.log.LogDbHandler',

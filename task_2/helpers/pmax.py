@@ -10,8 +10,8 @@ def _tournament(L, N) -> float:
 
 
 def get_p_max(sel_type: str, L: int, N: int) -> float:
-    if sel_type == RWS_SEL:
+    if sel_type == RWS_SEL[0]:
         return _rws(L, N)
 
-    if sel_type in TOURNAMENT_SEL_GROUP:
+    if sel_type in TOURNAMENT_SEL_GROUP[0]:
         return _tournament(L, N)
