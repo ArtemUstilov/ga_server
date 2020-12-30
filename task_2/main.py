@@ -26,7 +26,7 @@ def looper():
             time.sleep(30)
             task = pop_task()
 
-        logger.info('Acknowledged task', extra={'task_id': task.id})
+        logger.info('Acknowledged task', extra={'data': {'task_id': task.id}})
 
         # Find task implementation
         try:
@@ -39,16 +39,17 @@ def looper():
         try:
             task_func(task, **task.kwargs)
         except Exception as e:
-            logger.exception('Task failed', extra={'task_id': task.id}, exc_info=True)
+            logger.exception('Task failed', extra={'data': {'task_id': task.id}}, exc_info=True)
             return
 
         # Finish
         task.completed = True
         task.save()
-        logger.info('Task completed', extra={'task_id': task.id})
+        logger.info('Task completed', extra={'data': {'task_id': task.id}})
     except (KeyboardInterrupt, InterruptedError):
-        task.taken = False
-        task.save()
+        if task:
+            task.taken = False
+            task.save()
         raise
 
 

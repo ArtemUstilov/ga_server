@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, List
 
 import numpy as np
 
@@ -10,11 +10,23 @@ from task_2.helpers.encoding import encode, decode
 from task_2.helpers.constants import TESTING_FACTORS
 from task_2.helpers.runner import get_estimation_function, get_stop_cond_params
 from task_2.helpers.pmax import get_p_max
-from task_2.helpers.run_results import calculate_avg_test_results, calculate_best_test_results, \
-    calculate_best_run_set_results, calculate_avg_run_set_results
+from task_2.helpers.run_results import (
+    calculate_avg_test_results,
+    calculate_best_test_results,
+    calculate_best_run_set_results,
+    calculate_avg_run_set_results,
+)
 from task_2.helpers.tasks import TaskType, create_task, remove_pending_task
 from task_2.metrics.simple import hamming_distance_between
-from task_2.models import ParamSet, RunSet, Run, TestSuite, InitPopulation, ExperimentsSuite, Task
+from task_2.models import (
+    ParamSet,
+    RunSet,
+    Run,
+    TestSuite,
+    InitPopulation,
+    ExperimentsSuite,
+    Task,
+)
 from task_2.helpers.run_results import pairwise_hamming_distribution
 from task_2.metrics.distributions import target_hamming_distribution
 
@@ -69,7 +81,7 @@ def create_exp_suite(task: Task, param_set_id: int):
     :return: None
     """
 
-    logger.info('Take param set into work', extra={'param_set_id': param_set_id})
+    logger.info('Take param set into work', extra={'data': {'param_set_id': param_set_id}})
 
     param_set = ParamSet.get_by_id(param_set_id)
     p_max = get_p_max(param_set.sel_type, param_set.L, param_set.N)
@@ -102,7 +114,7 @@ def process_test_suite(task: Task, test_suite_id: int, finalize_id: Optional[int
     else:
         param_set: ParamSet = suite.exp_suite_after.param_set
 
-    logger.info('TestSuite taken into work', extra={'test_suite_id': test_suite_id})
+    logger.info('TestSuite taken into work', extra={'data': {'test_suite_id': test_suite_id}})
 
     count_successful = 0
     for run_num in range(param_set.num_runs):
@@ -123,7 +135,7 @@ def process_test_suite(task: Task, test_suite_id: int, finalize_id: Optional[int
     suite.save()
     if finalize_id:
         remove_pending_task(task.id, finalize_id)
-    logger.info('TestSuite finished successfully', extra={'test_suite_id': test_suite_id})
+    logger.info('TestSuite finished successfully', extra={'data': {'test_suite_id': test_suite_id}})
 
 
 # Yup
@@ -153,7 +165,7 @@ def finalize_test_suites(task: Task, is_before: bool, **kwargs):
         # In case, tests succeeded
         logger.info(
             'TestSuite succeeded. Setting Pmax to ExperimentsSuite',
-            extra={'test_suite_id': suite100.id}
+            extra={'data': {'test_suite_id': suite100.id}}
         )
         suite100.is_approved = True
         suite80.is_approved = True
@@ -171,7 +183,7 @@ def finalize_test_suites(task: Task, is_before: bool, **kwargs):
         # Tests did not succeed from the first time
         logger.info(
             'TestSuite failed. Creating task to find Pmax',
-            extra={'test_suite_id': suite100.id}
+            extra={'data': {'test_suite_id': suite100.id}}
         )
         suite100.is_approved = False
         suite80.is_approved = False
@@ -200,12 +212,13 @@ def finalize_test_suites(task: Task, is_before: bool, **kwargs):
 def process_run_set(task: Task, exp_suite_id: int, init_pmax: float):
     exp_suite = ExperimentsSuite.get_by_id(exp_suite_id)
     param_set = exp_suite.param_set
-    logger.info('Started creating RunSets', extra={'exp_suite_id': exp_suite_id})
+    logger.info('Started creating RunSets', extra={'data': {'exp_suite_id': exp_suite_id}})
 
     px = init_pmax
     sigma = px * 0.5
 
     last_succ_run_set = None
+    run_set_ids = []
 
     for runset_num in range(param_set.num_runsets):
         run_set = RunSet(try_number=runset_num, exp_suite=exp_suite)
@@ -230,11 +243,12 @@ def process_run_set(task: Task, exp_suite_id: int, init_pmax: float):
         run_set.succ_num = count_successful
         run_set.is_succ = count_successful == param_set.num_runs
         run_set.save()
+        run_set_ids.append(run_set.id)
 
-        create_task(
-            TaskType.FINALIZE_RUN_SET,
-            run_set_id=run_set.id
-        )
+    create_task(
+        TaskType.FINALIZE_RUN_SET,
+        run_set_ids=run_set_ids
+    )
 
     param_set.action_log.append(
         f'Found Pmax {last_succ_run_set.pmax} '
@@ -250,16 +264,17 @@ def process_run_set(task: Task, exp_suite_id: int, init_pmax: float):
     )
 
 
-def finalize_run_set(run_set_id: int):
+def finalize_run_set(task: Task, run_set_ids: List[int]):
     """
     Calculate in parallel aggregated metrics for RunSet
 
-    :param run_set_id: id of corresponding RunSet
+    :param task: current task
+    :param run_set_ids: list of ids of corresponding RunSets
     :return: None
     """
-
-    calculate_avg_run_set_results(run_set_id)
-    calculate_best_run_set_results(run_set_id)
+    for run_set_id in run_set_ids:
+        calculate_avg_run_set_results(run_set_id)
+        calculate_best_run_set_results(run_set_id)
 
 
 def process_single_run(
@@ -295,11 +310,12 @@ def process_single_run(
     L = param_set.L
 
     logger.info('Run taken into work', extra={
-        'param_set_id': param_set,
-        'run_num': run_num,
-        'run_set_id': run_set_id,
-        'test_suite_id': test_suite_id,
-    })
+        'data': {
+            'param_set_id': param_set.id,
+            'run_num': run_num,
+            'run_set_id': run_set_id,
+            'test_suite_id': test_suite_id,
+        }})
 
     # Initialization
     # pop: population with decimal values
@@ -380,7 +396,7 @@ def process_single_run(
             run.run_set = run_set_id
 
     run.save()
-    logger.info('Run completed successfully', extra={'run_id': run.id})
+    logger.info('Run completed successfully', extra={'data': {'run_id': run.id}})
 
     return run
 

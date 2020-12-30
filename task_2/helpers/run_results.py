@@ -7,7 +7,7 @@ from task_2.models import TestSuite, Run, RunSet
 
 def _calculate_avg(obj: Union[TestSuite, RunSet], runs: List[Run]):
     if not len(runs):
-        return
+        return obj
     n = len(runs)
     nfe_sum = 0
     iter_num_sum = 0
@@ -69,7 +69,7 @@ def _calculate_avg(obj: Union[TestSuite, RunSet], runs: List[Run]):
 
 def _calculate_best(obj: Union[TestSuite, RunSet], runs: List[Run]):
     if not len(runs):
-        return
+        return obj
     best_nfe = 0
     best_iter_num = 0
 

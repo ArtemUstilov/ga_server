@@ -18,7 +18,7 @@ class TaskType:
 
 
 def create_task(action, pending_tasks=None, **kwargs):
-    logger.info('Scheduled task', extra={'task_name': action})
+    logger.info('Scheduled task', extra={'data': {'task_name': action}})
     task = Task(action=action, kwargs=kwargs)
     if pending_tasks:
         task.pending_tasks = pending_tasks

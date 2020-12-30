@@ -14,11 +14,14 @@ class LogDbHandler(logging.Handler):
             process_name=os.environ.get('PROCESS_NAME'),
             created=datetime.fromtimestamp(record.created),
             message=record.msg,
-            extra=record.__dict__
+            extra={
+                'raw': str(record.__dict__),
+                'data': record.__dict__.get('data', {})
+            }
         )
 
+        log.save()
         print(log)
-        # log.save()
 
 
 log_config = {
