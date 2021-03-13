@@ -1,50 +1,41 @@
-from .count_next_population_sizes import next_population_size_type_1, next_population_size_type_2, \
-    next_population_size_type_3, next_population_size_type_4, next_population_size_type_3_init_200, \
-    next_population_size_type_3_init_200_increase_from_500
-from .estimation import const as all_l, on_split_locuses
-from .initialization import all_zeros as all_0, normal_with_locuses as normal
-from .selection import roulette as rws, tournament_2, tournament_4, tournament_12
-
-EPS = 0.0001
-N_IT = 20000
+from .estimation import const as all_l, two_const, sigma, inverted_hamming_distance, hamming_distance
+from .initialization import all_zeros as all_0, all_ones as all_1, half_zeros_half_ones as half_0_half_1, normal, \
+    normal_with_ideal
+from .selection import roulette as rws, tournament_gen, sus, uniform, not_linear_rang, linear_rang, cutting_selection, \
+    exp_rang, roulette_destroy, roulette_linear, roulette_mixed, roulette_power, roulette_sigma, \
+    tournament_without_return_gen
 
 INIT_MAP = {
     'all_0': all_0,
+    'all_1': all_1,
+    'half_1_half_0': half_0_half_1,
     'normal': normal,
+    'normal_with_ideal': normal_with_ideal,
 }
 
 ESTIM_MAP = {
     'all_l': all_l,
-    'on_split_locuses': on_split_locuses,
+    'two_const': two_const,
+    'sigma': sigma,
+    'hamming': hamming_distance,
+    'inv_hamming': inverted_hamming_distance,
 }
 
 SELECTION_MAP = {
     'rws': rws,
-    'tournament_2': tournament_2,
-    'tournament_4': tournament_4,
-    'tournament_12': tournament_12,
-}
-
-SIZE_POP = {
-    'type_1': next_population_size_type_1,
-    'type_2': next_population_size_type_2,
-    'type_3': next_population_size_type_3,
-    'type_4': next_population_size_type_4,
-    'type_3_init_200': next_population_size_type_3_init_200,
-    'type_3_i_200_px0_1': next_population_size_type_3_init_200,
-    'type_3_i_200_px10': next_population_size_type_3_init_200,
-    'type_3_i_200_if_500': next_population_size_type_3_init_200_increase_from_500,
-}
-
-N_POP = {
-    'type_1': 1000,
-    'type_2': 2000,
-    'type_3': 2000,
-    'type_4': 2000,
-    'type_3_init_200': 2000,
-    'type_3_i_200_px10': 2000,
-    'type_3_i_200_px0_1': 2000,
-    'type_3_i_200_if_500': 2000,
+    'roulette_linear': roulette_linear,
+    'roulette_sigma': roulette_sigma,
+    'roulette_power': roulette_power,
+    'roulette_destroy': roulette_destroy,
+    'roulette_mixed': roulette_mixed,
+    'sus': sus,
+    'tournament': tournament_gen,
+    'tournament_without_return_gen': tournament_without_return_gen,
+    'cutting_selection': cutting_selection,
+    'linear_rang': linear_rang,
+    'not_linear_rang': not_linear_rang,
+    'exp_rang': exp_rang,
+    'uniform': uniform,
 }
 
 cols_info = [
@@ -84,9 +75,15 @@ cols_info = [
     'mean_health_diff_0',
     'best_health_diff_0',
 
-    'polymorphism',
     'ga_run_settings_id',
-    'last_iter'
+    'last_iter',
+    'best_health',
+    'amount_bests',
+    'taken_to_next',
+    'diff_prev',
+    'intensity_prev',
+    'diff_prev_amount_bests',
+    'genotype',
 ]
 
 cols_settings = [
@@ -94,12 +91,13 @@ cols_settings = [
     'init',
     'estim',
     'sel_type',
-    'size_pop_type',
     'L',
-    'run_id'
+    'N',
+    'px',
+    'use_mutation',
+    'run_id',
+    'const_1', 'const_2', 'sigma', 'sel_param1', 'sel_param2', 'title'
 ]
 
 conn_str = "dbname=%s host=%s port=%d user=%s password=%s" % \
            ("thesis", "localhost", 5432, "artemustilov", "")
-
-#http://127.0.0.1:8000/thesis/run?size_pop_type=type_1&l=10&px=0.1&runs=1&init=all_0&estim=all_l&sel_type=rws

@@ -93,7 +93,7 @@ def fill_chart(run_id):
         fig.savefig(pic_IObytes, format='png', bbox_inches='tight')
         pic_IObytes.seek(0)
         pic_hash = base64.b64encode(pic_IObytes.read()).decode('utf8')
-        sql = f" UPDATE ga_run_settings set chart='{pic_hash}'"
+        sql = f" UPDATE ga_run_settings set chart='{pic_hash}' where id='{run_id}'"
 
         cur.execute(sql)
         conn.commit()

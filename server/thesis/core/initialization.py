@@ -1,45 +1,69 @@
 import numpy as np
 
+from .utils import generate_locus_roles, GOOD
+
 
 def all_zeros(num_ind, num_locuses, *args, **kwargs):
     return np.zeros((num_ind, num_locuses), dtype=np.int8)
+
+
+def all_ones(num_ind, num_locuses, *args, **kwargs):
+    return np.ones((num_ind, num_locuses), dtype=np.int8)
+
+
+def half_zeros_half_ones(num_ind, num_locuses, random_state, *args, **kwargs):
+    random = np.random
+    if random_state:
+        random = np.random.RandomState(random_state)
+
+    arr = (np.concatenate(
+        (np.zeros((int(num_ind / 2), num_locuses), dtype=np.int8),
+         np.ones((int(num_ind / 2), num_locuses), dtype=np.int8)),
+        axis=0))
+
+    random.shuffle(arr)
+
+    return arr
 
 
 def uniform(num_ind, num_locuses, *args, **kwargs):
     return np.random.randint(0, 2, (num_ind, num_locuses), dtype=np.int8)
 
 
-def normal(num_ind, num_locuses, *args, **kwargs):
-    pop = np.zeros((num_ind, num_locuses), dtype=np.int8)
-    random = np.random.RandomState(42)
-    for i in range(num_ind):
-        health = int(random.normal())
-        while health < 0:
-            health = int(random.normal())
+def normal(num_ind, num_locuses,random_state,  *args, **kwargs):
+    random = np.random
+    if random_state:
+        random = np.random.RandomState(random_state)
 
-        count = 0
-        while count < health:
-            ind = random.randint(0, num_locuses)
-            while pop[i][ind] == 1:
-                ind = random.randint(0, num_locuses)
-
-            pop[i][ind] = 1
-            count += 1
+    pop = random.choice([0,1], (num_ind,num_locuses), p=[0.5, 0.5])
 
     return pop
 
 
-def normal_with_locuses(num_ind, num_locuses, good, *args, **kwargs):
+def normal_with_ideal(num_ind, num_locuses,random_state, *args, **kwargs):
+    random = np.random
+    if random_state:
+        random = np.random.RandomState(random_state)
+
+    pop = random.choice([0,1], (num_ind,num_locuses), p=[0.5, 0.5])
+    pop[0] = np.zeros(num_locuses)
+
+    return pop
+
+
+def normal_with_locuses(num_ind, num_locuses, *args, **kwargs):
+    ar = generate_locus_roles(num_ind)
+    good = list(ar == GOOD)
+
     pop = np.zeros((num_ind, num_locuses), dtype=np.int8)
-    random = np.random.RandomState(42)
 
     for i in range(num_ind):
         count = 0
-        health = int(random.normal())
+        health = int(abs(np.random.normal()))
         while count < health:
-            ind = random.randint(0, num_locuses)
+            ind = np.random.randint(0, num_locuses)
             while good[ind] != 0 or pop[i][ind] == 1:
-                ind = random.randint(0, num_locuses)
+                ind = np.random.randint(0, num_locuses)
 
             pop[i][ind] = 1
             count += 1
