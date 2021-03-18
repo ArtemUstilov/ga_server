@@ -129,24 +129,24 @@ def cutting_selection(population, values, sel_param1, **kwargs):
     return pop, sel_param1
 
 
-def get_range(values):
+def get_ranks(values):
     N = values.shape[0]
     indx = np.arange(values.shape[0])
-    valind = np.array(list(zip(values, indx)))
+    valind = np.array(list(zip(values, indx)),  dtype=np.float64)
 
-    ranges = np.sort(valind.view('i8,i8'), order=['f0'], axis=0).view(int)[::-1][:, 1]
+    sorted = np.sort(valind.view('f8,f8'), order=['f0'], axis=0).view(float)[::-1][:, 1]
 
-    rangs = list(np.zeros(N))
+    ranks = list(np.zeros(N))
     for i in range(0, N):
-        rangs[ranges[i]] = i
-    return N - 1 - np.array(rangs)
+        ranks[int(sorted[i])] = i
+    return N - 1 - np.array(ranks)
 
 
 def linear_rang(population, values, sel_param1, **kwargs):
     N = values.shape[0]
     B = sel_param1
 
-    probabilities = (2 - B) / N + (2 * get_range(values) * (B - 1)) / (N * (N - 1))
+    probabilities = (2 - B) / N + (2 * get_ranks(values) * (B - 1)) / (N * (N - 1))
     return sus_with_probs(probabilities, population, values)
 
 
@@ -155,14 +155,14 @@ def not_linear_rang(population, values, sel_param1, sel_param2, **kwargs):
     B = sel_param1
     a = sel_param2
     c = ((B - a) * N * (2 * N - 1)) / (6 * (N - 1)) + N * a
-    probabilities = a / c + (get_range(values) * get_range(values) * (B - a)) / ((N - 1) * (N - 1) * c)
+    probabilities = a / c + (get_ranks(values) * get_ranks(values) * (B - a)) / ((N - 1) * (N - 1) * c)
     return sus_with_probs(probabilities, population, values)
 
 
 def exp_rang(population, values, sel_param1, **kwargs):
     N = values.shape[0]
     c = sel_param1
-    ranges = get_range(values) + 1
+    ranges = get_ranks(values) + 1
     probabilities = (c - 1) / (c ** N - 1) * (c ** (N - ranges))
     return sus_with_probs(probabilities, population, values)
 
@@ -171,9 +171,11 @@ def uniform(population, values, **kwargs):
     minV = values.min()
     maxV = values.max()
 
-    rand = np.random.randint(minV, maxV, values.shape[0]) if minV < maxV else np.ones(values.shape[0]) * minV
+    rand = np.random.randint(minV, maxV, values.shape[0]) \
+        if minV < maxV else np.ones(values.shape[0]) * minV
     sel_indexes = list(np.zeros(values.shape[0]))
     for i in range(values.shape[0]):
-        sel_indexes[i] = np.argmin(np.abs(values - rand[i]))
+        arr = np.where(np.abs(values - rand[i]) == np.abs(values - rand[i]).min())
+        sel_indexes[i] = np.random.choice([i[0] for i in arr])
     sel_indexes = np.array(sel_indexes)
     return population[sel_indexes], np.unique(sel_indexes).shape[0]

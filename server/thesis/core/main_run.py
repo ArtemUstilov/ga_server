@@ -1,6 +1,7 @@
 import math
 import json
 import uuid
+from scipy.stats import variation
 from threading import Thread
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -19,7 +20,7 @@ from .utils import pairwise_hamming_distribution, ideal_hamming_distribution, \
 
 
 def run(cursor, conn, run_id, uniq_id, l, n, px, estim, pop, sel_type, use_mutation, save_pair, sigma, const_1,
-        const_2, sel_param1, sel_param2, maxN):
+        const_2, sel_param1, sel_param2, maxN, stop_confluence):
     kwargs = {
         'sigma': sigma,
         'const_1': const_1,
@@ -57,8 +58,13 @@ def run(cursor, conn, run_id, uniq_id, l, n, px, estim, pop, sel_type, use_mutat
         prev_mean_health = mean_health
         mean_health = health.mean()
 
-        store_in_db(cursor, conn, uniq_id, pop, health, mean_health, i, i == maxN - 1, save_pair,
+        confluence = pop.sum() == 0 or pop.sum() == pop.shape[0] * pop.shape[1]
+        last_iter = i == maxN - 1
+        store_in_db(cursor, conn, uniq_id, pop, health, mean_health, i, confluence or last_iter, save_pair,
                     taken_to_next, prev_mean_health, prev_health, hamming_distance(pop, **kwargs), **kwargs)
+
+        if confluence:
+            break
 
     return succ
 
@@ -227,7 +233,7 @@ def store_in_db(cursor, conn, uniq_id, pop, health, mean_health, it, last_iter, 
 
 def start_one(init, estim, sel_type, l, n, px, use_mutation, runs, save_pair, sigma, const_1, const_2, sel_param1,
               sel_param2,
-              maxN, random_state, title):
+              maxN, random_state, title, stop_confluence):
     with open_db_cursor(constants.conn_str) as (cursor, conn):
         ids = []
 
@@ -239,7 +245,7 @@ def start_one(init, estim, sel_type, l, n, px, use_mutation, runs, save_pair, si
         t = Thread(target=one_run, args=(
             init, estim, sel_type, l, n, px, use_mutation, ids, save_pair, sigma, const_1, const_2, sel_param1,
             sel_param2,
-            maxN, random_state))
+            maxN, random_state, stop_confluence))
         t.start()
 
         return ids
@@ -247,7 +253,7 @@ def start_one(init, estim, sel_type, l, n, px, use_mutation, runs, save_pair, si
 
 def one_run(init, estim, sel_type, l, n, px, use_mutation, ids, save_pair, sigma, const_1, const_2, sel_param1,
             sel_param2,
-            maxN, random_state):
+            maxN, random_state, stop_confluence):
     with open_db_cursor(constants.conn_str) as (cursor, conn):
         initialization = constants.INIT_MAP[init]
         pop = initialization(n, l, random_state=random_state)
@@ -265,7 +271,7 @@ def one_run(init, estim, sel_type, l, n, px, use_mutation, ids, save_pair, sigma
                 sel_type,
                 use_mutation,
                 save_pair,
-                sigma, const_1, const_2, sel_param1, sel_param2, maxN
+                sigma, const_1, const_2, sel_param1, sel_param2, maxN, stop_confluence
             )
 
 
@@ -339,3 +345,38 @@ def get_info(run_id):
         iterations_json = json.dumps(iterations)
 
         return iterations_json
+
+
+def get_info_details(run_id):
+    with open_db_cursor(constants.conn_str) as (cursor, conn):
+        cursor.execute(f"SELECT health FROM ga_run_info "
+                       f"where ga_run_settings_id = '{run_id}' and (iteration=0 or iteration=1)")
+
+        rows = cursor.fetchall()
+        health_before = np.array(rows[0][0])
+        health_after = np.array(rows[1][0])
+        m_before = health_before.mean()
+        d_before = health_before.var()
+        std_before = health_before.std()
+        cv_before = variation(health_before, axis=0)
+        r_before = health_before.max() - health_before.min()
+
+        m_after = health_after.mean()
+        d_after = health_after.var()
+        std_after = health_after.std()
+        cv_after = variation(health_after, axis=0)
+        r_after = health_after.max() - health_after.min()
+
+        res = {
+            'm_before': float(m_before),
+            'd_before': float(d_before),
+            'std_before': float(std_before),
+            'cv_before': float(cv_before),
+            'r_before': float(r_before),
+            'm_after': float(m_after),
+            'd_after': float(d_after),
+            'std_after': float(std_after),
+            'cv_after': float(cv_after),
+            'r_after': float(r_after),
+        }
+        return json.dumps(res)

@@ -1,4 +1,6 @@
+from django.core.serializers import json
 from django.http import HttpResponse, HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
 
@@ -16,6 +18,7 @@ def index(request):
     init = request.GET.get('init')
     title = request.GET.get('title')
     estim = request.GET.get('estim')
+    stop_confluence = request.GET.get('stop_confluence')
     use_mutation = bool(int(request.GET.get('use_mutation')))
     sel_type = request.GET.get('sel_type')
 
@@ -47,7 +50,8 @@ def index(request):
         float(sel_param2) if sel_param2 else None,
         int(maxN),
         int(random_state),
-        title
+        title,
+        stop_confluence
     )
 
     return JsonResponse(ids, content_type="application/json", safe=False)
@@ -65,6 +69,16 @@ def get_info(request):
     run_id = request.GET.get('run_id')
 
     return HttpResponse(main_run.get_info(run_id))
+
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def get_info_details(request):
+    run_ids = request.POST.getlist('run_ids[]')
+    res = []
+    for i in run_ids:
+        res.append(main_run.get_info_details(i))
+    return HttpResponse(res)
 
 
 @require_http_methods(["GET"])

@@ -1,5 +1,5 @@
 from .estimation import const as all_l, two_const, sigma, inverted_hamming_distance, hamming_distance
-from .initialization import all_zeros as all_0, all_ones as all_1, half_zeros_half_ones as half_0_half_1, normal, \
+from .initialization import all_zeros as all_0, all_ones as all_1, half_zeros_half_ones as half_0_half_1,all_1_one_0, normal, \
     normal_with_ideal
 from .selection import roulette as rws, tournament_gen, sus, uniform, not_linear_rang, linear_rang, cutting_selection, \
     exp_rang, roulette_destroy, roulette_linear, roulette_mixed, roulette_power, roulette_sigma, \
@@ -8,6 +8,7 @@ from .selection import roulette as rws, tournament_gen, sus, uniform, not_linear
 INIT_MAP = {
     'all_0': all_0,
     'all_1': all_1,
+    'all_1_one_0': all_1_one_0,
     'half_1_half_0': half_0_half_1,
     'normal': normal,
     'normal_with_ideal': normal_with_ideal,
