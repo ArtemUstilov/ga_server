@@ -10,13 +10,11 @@ import numpy as np
 from psycopg2.extras import execute_values
 
 from .database import open_db_cursor
-from .mutation import mutate
 from .estimation import hamming_distance
-from .draw_plot_analysis import fill_chart
 from . import constants
 
 from .utils import pairwise_hamming_distribution, ideal_hamming_distribution, \
-    wild_type_hamming_distribution, locus_roles_polymorphous, write_locuses_roles
+    wild_type_hamming_distribution
 
 
 def run(cursor, conn, run_id, uniq_id, l, n, px, estim, pop, sel_type, use_mutation, save_pair, sigma, const_1,
